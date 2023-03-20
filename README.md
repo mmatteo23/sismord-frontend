@@ -21,15 +21,15 @@
   <a href="https://www.sismo.io/" target="_blank"></a>
 </div>
 
-This repository is a fork of the [zksub](https://github.com/sismo-core/zksub) repository translated from React to Next.js and simplified to help you using zkConnect with Next.js.
-
 The zkSub app allows to register users to a mailing list once they have privately authenticate themselves with [zkConnect](https://github.com/sismo-core/zk-connect-packages) single sign-on. 
+
+This repository is a fork of the [zksub](https://github.com/sismo-core/zksub) repository translated from React to Next.js and simplified to help you using zkConnect with Next.js.
 
 The repository is build with Next.js using:
 - In the `frontend` we use the [zk-connect-react](https://github.com/sismo-core/zk-connect-packages) package to redirect the user to Sismo Vault App to generate a zero-knowledge proof. Once the proof is generated, the user is redirected back to zkSub and the proof is sent to the backend. 
 - In the `backend`, we use the [zk-connect-server](https://github.com/sismo-core/zk-connect-packages) package to verify that the proof is valid. If that's the case, the user is registered to the mailing list.
 
-You can see the deployed demo app at [https://demo.zksub.io/](https://demo.zksub.io/).
+You can see a deployed demo app at [https://demo.zksub.io/](https://demo.zksub.io/).
 
 Here is a guide to integrate ZK Connect in your own application: [https://zk-connect-guide.sismo.io/](https://zk-connect-guide.sismo.io/).
 
@@ -51,7 +51,22 @@ yarn dev
 
 ## Deploy on Vercel
 
+This zksub-next repository has been deployed on vercel at [https://zksub-next.vercel.app/](https://zksub-next.vercel.app/)
 
+Here is how you can easily deploy yours: 
+1) Create an account on [Vercel](https://vercel.com/) 
+
+2) Link your Github account to your Vercel account
+
+3) Import your zksub repository in vercel
+
+4) Configure your environment variables
+```sh
+NEXT_PUBLIC_ENV_NAME=LOCAL
+NEXT_PUBLIC_SISMO_HUB_URL=https://hub.sismo.io
+```
+
+And that's it! 
 
 <br/>
 <img src="https://static.sismo.io/readme/bottom-main.png" alt="bottom" width="100%" >
