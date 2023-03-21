@@ -51,20 +51,15 @@ yarn dev
 
 ## Deploy on Vercel
 
-This zksub-next repository has been deployed on vercel at [https://zksub-next.vercel.app/](https://zksub-next.vercel.app/)
+This zksub-next repository has been deployed on Vercel at [https://zksub-next.vercel.app/](https://zksub-next.vercel.app/)
 
 Here is how you can easily deploy yours: 
-1) Create an account on [Vercel](https://vercel.com/) 
 
-2) Link your Github account to your Vercel account
+1) Create an account on Vercel with your Github account
 
-3) Import your zksub repository in vercel
+2) Create a new project and import your zksub repository in Vercel
 
-4) Configure your environment variables
-```sh
-NEXT_PUBLIC_ENV_NAME=LOCAL
-NEXT_PUBLIC_SISMO_HUB_URL=https://hub.sismo.io
-```
+3) Choose a project name and deploy it
 
 And that's it! 
 

@@ -1,9 +1,10 @@
 import styled from "styled-components";
 import { useState, useEffect, useMemo } from "react";
-import { MagnifyingGlass, Info } from "phosphor-react";
+import { MagnifyingGlass } from "phosphor-react";
 import colors from "../../theme/colors";
 import { Shard, ShardGroup } from "../SismoReactIcon";
-import axios from "axios";
+import { useZkConnect } from "@sismo-core/zk-connect-react";
+import { zkConnectConfig } from "@/pages";
 
 const Container = styled.div`
   width: 100%;
@@ -89,13 +90,19 @@ const SearchResultItem = styled.a`
   text-decoration: none;
 `;
 
-export default function Search(): JSX.Element {
+type Props = {
+  groupId: string;
+}
+
+export default function Search({ groupId }: Props): JSX.Element {
   const [isFocused, setIsFocused] = useState(false);
   const [searchValue, setSearchValue] = useState("");
+  const { zkConnect } = useZkConnect({
+    config: zkConnectConfig
+  });
 
-  const [eligibleAccounts, setEligibleAccounts] = useState<string[]>([]);
+  const [membersOfGroup, setMembersOfGroup] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
 
   function onChange(event: React.ChangeEvent<HTMLInputElement>) {
     setSearchValue(event.target.value);
@@ -109,29 +116,19 @@ export default function Search(): JSX.Element {
       }
       return stringArray;
     }
-
-    async function getEligibleAccounts(groupName: string) {
+    async function getMembersOfGroup() {
       try {
         setLoading(true);
-        setError("");
-        const latestGroups = await axios.get(
-          `${process.env.NEXT_PUBLIC_SISMO_HUB_URL}/groups/latests`
-        );
-        const group = latestGroups.data.items.find(
-          (group: any) => group.name === groupName
-        );
-        const response = await axios.get(group.dataUrl);
-        const _eligibleAccounts = convertObjectToStringArray(response.data);
-
-        setEligibleAccounts(_eligibleAccounts);
+        const group = await zkConnect.getGroup({ id: groupId });
+        const _membersOfGroup = convertObjectToStringArray(group.data);
+        setMembersOfGroup(_membersOfGroup);
         setLoading(false);
       } catch (error) {
         setLoading(false);
-        setError("no group found");
+        console.error(error);
       }
     }
-
-    getEligibleAccounts("the-merge-contributor");
+    getMembersOfGroup();
   }, []);
 
   function search(dataSet: string[], searchValue: string) {
@@ -142,18 +139,17 @@ export default function Search(): JSX.Element {
     const searchResult = dataSet.filter(item => {
       if (item.toLowerCase().includes(lowerCaseSearchValue)) return item;
     });
-
     return searchResult;
   }
 
   const searchedAccounts = useMemo(() => {
-    if (searchValue.length > 1 && eligibleAccounts.length > 0) {
-      const _searchedAccounts = search(eligibleAccounts, searchValue);
+    if (searchValue.length > 1 && membersOfGroup.length > 0) {
+      const _searchedAccounts = search(membersOfGroup, searchValue);
       return _searchedAccounts;
     } else {
-      return eligibleAccounts;
+      return membersOfGroup;
     }
-  }, [eligibleAccounts, searchValue]);
+  }, [membersOfGroup, searchValue]);
 
   return (
     <>
@@ -189,7 +185,7 @@ export default function Search(): JSX.Element {
             searchedAccounts.map((account, index) => {
               return (
                 <SearchResultItem
-                  key={account + "eligibleAccount" + index}
+                  key={account + "memberOfGroup" + index}
                   href={
                     "https://github.com/sismo-core/sismo-hub/tree/main/group-generators/generators/the-merge-contributor/index.ts"
                   }

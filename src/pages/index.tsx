@@ -7,7 +7,7 @@ import { ZkConnectButton, ZkConnectClientConfig, ZkConnectResponse } from '@sism
 import axios from "axios";
 import { useState } from 'react';
 
-const config: ZkConnectClientConfig = {
+export const zkConnectConfig: ZkConnectClientConfig = {
   appId: "0x112a692a2005259c25f6094161007967",
   devMode: {
 		enabled: process.env.NEXT_PUBLIC_ENV_NAME === "LOCAL", 
@@ -43,9 +43,9 @@ export default function Home() {
             privacy-preserving manner—gaining access to exclusive tickets for web3
             events.
           </Subtitle>
-          <Search />
+          <Search groupId="0x42c768bb8ae79e4c5c05d3b51a4ec74a"/>
           <ZkConnectButton 
-            config={config}
+            config={zkConnectConfig}
             dataRequest={{
               //The merge contributor groupId
               groupId: "0x42c768bb8ae79e4c5c05d3b51a4ec74a"
