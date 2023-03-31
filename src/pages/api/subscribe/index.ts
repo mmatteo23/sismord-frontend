@@ -1,5 +1,5 @@
 // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
-import { DataRequest, ZkConnect, ZkConnectServerConfig } from '@sismo-core/zk-connect-server';
+import { DataRequest, ZkConnect, ZkConnectServerConfig, AuthType } from '@sismo-core/zk-connect-server';
 import type { NextApiRequest, NextApiResponse } from 'next'
 
 enum Status {
@@ -11,7 +11,7 @@ enum Status {
 
 type Data = { 
   status: Status,
-  vaultId?: string,
+  userId?: string,
   email?: string,
   message?: string
 }
@@ -25,9 +25,12 @@ const zkConnectConfig: ZkConnectServerConfig = {
 
 const zkConnect = ZkConnect(zkConnectConfig);
 
-const THE_MERGE_CONTRIBUTOR = DataRequest({
+const claimRequest = {
   groupId: "0x42c768bb8ae79e4c5c05d3b51a4ec74a",
-});
+};
+const authRequest = {
+  authType: AuthType.ANON,
+};
 
 const emailMemoryStore = new Map();
 
@@ -35,27 +38,30 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<Data>
 ) {
+
   const { email, zkConnectResponse } = req.body;
 
   try {
-    const { vaultId } = await zkConnect.verify(zkConnectResponse, {
-      dataRequest: THE_MERGE_CONTRIBUTOR,
+    const { verifiedAuths } = await zkConnect.verify(zkConnectResponse, {
+      authRequest,
+      claimRequest,
     });
+    const userId =  verifiedAuths[0].userId;
     // if email is not provided, check if the user is already subscribed
     if (!email) {
-      if (emailMemoryStore.has(vaultId)) {
-        const existingEmail = emailMemoryStore.get(vaultId);
+      if (emailMemoryStore.has(userId)) {
+        const existingEmail = emailMemoryStore.get(userId);
         res.status(200).send({
           email: existingEmail,
-          vaultId,
+          userId,
           status: Status.AlreadySubscribed,
         });
         return;
       }
-      res.status(200).send({ status: Status.NotSubscribed, vaultId });
+      res.status(200).send({ status: Status.NotSubscribed, userId });
     } else {
-      emailMemoryStore.set(vaultId, email);
-      res.status(200).send({ email, status: Status.Success, vaultId });
+      emailMemoryStore.set(userId, email);
+      res.status(200).send({ email, status: Status.Success, userId });
     }
   } catch (e: any) {
     //If the response is not valid

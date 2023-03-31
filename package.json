@@ -9,8 +9,8 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@sismo-core/zk-connect-react": "^0.0.2",
-    "@sismo-core/zk-connect-server": "^0.0.2",
+    "@sismo-core/zk-connect-react": "^0.0.3",
+    "@sismo-core/zk-connect-server": "^0.0.3",
     "@types/node": "18.15.3",
     "@types/react": "18.0.28",
     "@types/react-dom": "18.0.11",
