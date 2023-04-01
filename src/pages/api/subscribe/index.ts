@@ -52,7 +52,7 @@ export default async function handler(
       if (discordMemoryStore.has(userId)) {
         const existingDiscordId = discordMemoryStore.get(userId);
         res.status(200).send({
-          email: existingDiscordId,
+          discordId: existingDiscordId,
           userId,
           status: Status.AlreadySubscribed,
         });

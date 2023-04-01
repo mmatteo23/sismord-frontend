@@ -42,7 +42,7 @@ export default function Home() {
 
   async function onSubmitDiscordId(discordId: string) {
     console.log("Submitting discord id: ", discordId);
-    const res = await axios.post(`/api/subscribe`, {
+    const res = await axios.post(`http://localhost:3333/verify`, {
       discordId: discordId,
       zkConnectResponse,
     });
