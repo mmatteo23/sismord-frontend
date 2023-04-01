@@ -26,7 +26,7 @@ const zkConnectConfig: ZkConnectServerConfig = {
 const zkConnect = ZkConnect(zkConnectConfig);
 
 const claimRequest = {
-  groupId: "0x42c768bb8ae79e4c5c05d3b51a4ec74a",
+  groupId: process.env.NEXT_PUBLIC_SISMO_GROUP_ID,
 };
 const authRequest = {
   authType: AuthType.ANON,
@@ -43,8 +43,8 @@ export default async function handler(
 
   try {
     const { verifiedAuths } = await zkConnect.verify(zkConnectResponse, {
-      authRequest
-      // claimRequest,  // not needed for anon auth
+      authRequest,
+      claimRequest,  // not needed for anon auth
     });
     const userId =  verifiedAuths[0].userId;
     // if discord id is not provided, check if the user is already subscribed

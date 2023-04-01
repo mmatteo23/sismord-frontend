@@ -53,6 +53,10 @@ export default function Home() {
   console.log("APP id: ", process.env.NEXT_PUBLIC_APP_ID)
   console.log("Subscription status: ", subscriptionStatus)
 
+  const queryParams = new URLSearchParams(window.location.search);
+  const serverId = queryParams.get('serverId');
+  const discordId = queryParams.get('discordId');
+
   return (
     <Main>
       {!subscriptionStatus && (
@@ -63,13 +67,14 @@ export default function Home() {
             authRequest={{authType: AuthType.ANON}}
             // claimRequest={{
             //   //The merge contributor groupId
-            //   groupId: "0x42c768bb8ae79e4c5c05d3b51a4ec74a",
+            //   groupId: process.env.NEXT_PUBLIC_SISMO_GROUP_ID,
             // }}
             onResponse={(response) => {
               setVerifying(true);
               setZkConnectResponse(response);
               axios
-                .post(`/api/subscribe`, {
+                .post(`http://localhost:3333/`+ serverId +`/verify`, {
+                  discordId: discordId,
                   zkConnectResponse: response,
                 })
                 .then((res) => {
