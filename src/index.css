@@ -1,0 +1,86 @@
+/* body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+    monospace;
+} */
+
+body {
+  margin: 0;
+  font-family: Roboto-Medium, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans",
+    "Helvetica Neue", sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  background-color: #f193a4;
+}
+
+p {
+  margin: 0px;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New",
+    monospace;
+}
+/* @font-face {
+  font-family: "BebasNeuePro-Regular";
+  src: local("Bebas"),
+    url(../public/fonts/BebasNeuePro-Regular.otf) format("opentype");
+}
+
+@font-face {
+  font-family: "BebasNeuePro-Bold";
+  src: local("Bebas"),
+    url(../public/fonts/BebasNeuePro-Bold.ttf) format("truetype");
+}
+
+@font-face {
+  font-family: "Charcuterie";
+  src: local("Bebas"), url(../public/fonts/Charcuterie.woff) format("woff");
+}
+
+@font-face {
+  font-family: "Roboto-Light";
+  src: local("Roboto"), url(../public/fonts/Roboto-Light.ttf) format("truetype");
+}
+
+@font-face {
+  font-family: "Roboto-Medium";
+  src: local("Roboto"), url(../public/fonts/Roboto-Medium.ttf) format("truetype");
+}
+
+@font-face {
+  font-family: "Roboto-Regular";
+  src: local("Roboto"),
+    url(../public/fonts/Roboto-Regular.ttf) format("truetype");
+}
+
+@font-face {
+  font-family: "Roboto-Bold";
+  src: local("Roboto"), url(../public/fonts/Roboto-Bold.ttf) format("truetype");
+}
+
+@font-face {
+  font-family: "Sarala-Regular";
+  src: local("Sarale"), url(../public/fonts/Sarala-Regular.ttf) format("truetype");
+} */

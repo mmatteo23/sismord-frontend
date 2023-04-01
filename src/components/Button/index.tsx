@@ -39,7 +39,7 @@ const Content = styled.div<{
 }>`
   font-size: 16px;
   line-height: 22px;
-  font-family: ${props => props.theme.fonts.charcuterie};
+  font-family: ${props => props.theme.fonts.regular};
 `;
 
 type ButtonProps = {

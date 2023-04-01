@@ -1,67 +1,46 @@
-<br />
-<div align="center">
-  <img src="https://static.sismo.io/readme/top-main.png" alt="Logo" width="150" height="150" style="borderRadius: 20px">
+# Getting Started with Create React App
 
-  <h3 align="center">
-    zkSub
-  </h3>
+This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
-  <p align="center">
-    Made by <a href="https://www.docs.sismo.io/" target="_blank">Sismo</a>
-  </p>
-  
-  <p align="center">
-    <a href="https://discord.gg/uAPtsfNrve" target="_blank">
-        <img src="https://img.shields.io/badge/Discord-7289DA?style=for-the-badge&logo=discord&logoColor=white"/>
-    </a>
-    <a href="https://twitter.com/sismo_eth" target="_blank">
-        <img src="https://img.shields.io/badge/Twitter-1DA1F2?style=for-the-badge&logo=twitter&logoColor=white"/>
-    </a>
-  </p>
-  <a href="https://www.sismo.io/" target="_blank"></a>
-</div>
+## Available Scripts
 
-The zkSub app allows to register users to a mailing list once they have privately authenticate themselves with [zkConnect](https://github.com/sismo-core/zk-connect-packages) single sign-on. 
+In the project directory, you can run:
 
-This repository is a fork of the [zksub](https://github.com/sismo-core/zksub) repository translated from React to Next.js and simplified to help you using zkConnect with Next.js.
+### `npm start`
 
-The repository is build with Next.js using:
-- In the `frontend` we use the [zk-connect-react](https://github.com/sismo-core/zk-connect-packages) package to redirect the user to Sismo Vault App to generate a zero-knowledge proof. Once the proof is generated, the user is redirected back to zkSub and the proof is sent to the backend. 
-- In the `backend`, we use the [zk-connect-server](https://github.com/sismo-core/zk-connect-packages) package to verify that the proof is valid. If that's the case, the user is registered to the mailing list.
+Runs the app in the development mode.\
+Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
 
-You can see a deployed demo app at [https://demo.zksub.io/](https://demo.zksub.io/).
+The page will reload if you make edits.\
+You will also see any lint errors in the console.
 
-Here is a guide to integrate ZK Connect in your own application: [https://zk-connect-guide.sismo.io/](https://zk-connect-guide.sismo.io/).
+### `npm test`
 
-## Installation
+Launches the test runner in the interactive watch mode.\
+See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
 
-### Prerequisites
+### `npm run build`
 
-- [Node.js](https://nodejs.org/en/download/) (v18.15.0, latest LTS version)
-- [Yarn](https://classic.yarnpkg.com/en/docs/install/#mac-stable)
+Builds the app for production to the `build` folder.\
+It correctly bundles React in production mode and optimizes the build for the best performance.
 
-In a first terminal:
-```sh
-# Install dependencies
-yarn 
+The build is minified and the filenames include the hashes.\
+Your app is ready to be deployed!
 
-# Start server on http://localhost:3000
-yarn dev
-```
+See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
 
-## Deploy on Vercel
+### `npm run eject`
 
-This zksub-next repository has been deployed on Vercel at [https://zksub-next.vercel.app/](https://zksub-next.vercel.app/)
+**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
 
-Here is how you can easily deploy yours: 
+If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
 
-1) Create an account on Vercel with your Github account
+Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
 
-2) Create a new project and import your zksub repository in Vercel
+You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
 
-3) Choose a project name and deploy it
+## Learn More
 
-And that's it! 
+You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
 
-<br/>
-<img src="https://static.sismo.io/readme/bottom-main.png" alt="bottom" width="100%" >
+To learn React, check out the [React documentation](https://reactjs.org/).

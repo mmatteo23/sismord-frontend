@@ -1,22 +1,22 @@
-import DiscordForm from "@/components/DiscordForm";
-import { Main } from "@/components/Main";
-import Search from "@/components/Search";
-import { Subtitle } from "@/components/Subtitle";
-import { Title } from "@/components/Title";
+import React, { useEffect, useState } from 'react';
+import logo from './logo.svg';
+import './App.css';
+// import './styles/globals.css';
 import {
   ZkConnectButton,
   ZkConnectClientConfig,
   ZkConnectResponse,
   AuthType,
 } from "@sismo-core/zk-connect-react";
-import axios from "axios";
-import { useState } from "react";
+import { Main } from './components/Main';
+import { Title } from './components/Title';
+import axios from 'axios';
 
 export const zkConnectConfig: ZkConnectClientConfig = {
-  appId: process.env.NEXT_PUBLIC_APP_ID,
+  appId: process.env.REACT_APP_APP_ID as string,
   devMode: {
     // enable or disable dev mode here to create development groups and use the development vault.
-    enabled: process.env.NEXT_PUBLIC_ENV_NAME === "LOCAL" ? true : false,
+    enabled: process.env.REACT_APP_ENV_NAME === "LOCAL" ? true : false,
     // devGroups: [
     //   {
     //     groupId: "0x42c768bb8ae79e4c5c05d3b51a4ec74a",
@@ -35,27 +35,38 @@ enum SubscriptionStatus {
   NotSubscribed = "not-subscribed",
 }
 
-export default function Home() {
+
+
+function App() {
   const [verifying, setVerifying] = useState(false);
   const [subscriptionStatus, setSubscriptionStatus] = useState<SubscriptionStatus | null>(null);
   const [zkConnectResponse, setZkConnectResponse] = useState<ZkConnectResponse | null>(null);
-
-  async function onSubmitDiscordId(discordId: string) {
-    console.log("Submitting discord id: ", discordId);
-    const res = await axios.post(`http://localhost:3333/verify`, {
-      discordId: discordId,
-      zkConnectResponse,
-    });
-
-    return res;
-  }
-
-  console.log("APP id: ", process.env.NEXT_PUBLIC_APP_ID)
+  const [serverId, setServerId] = useState<string | null>(null);
+  const [discordId, setDiscordId] = useState<string | null>(null);
+  
+  console.log("APP id: ", process.env.REACT_APP_APP_ID)
   console.log("Subscription status: ", subscriptionStatus)
+  
+  const searchParams = new URLSearchParams(document.location.search)
+  
+  useEffect(() => {
+    if (searchParams.get("serverId")) {
+      const serverId = searchParams.get("serverId")
+      const discordId = searchParams.get("discordId")
+      // setServerId(serverId)
+      // setDiscordId(discordId)
+      // console.log(document.location.href)
+      // console.log(discordId as string + (document.location.href).split("#")[1])
+      localStorage.setItem("serverId", serverId as string)
+      localStorage.setItem("discordId", discordId as string + "#" + (document.location.href).split("#")[1])
+    } 
+  }, [searchParams])
 
-  const queryParams = new URLSearchParams(window.location.search);
-  const serverId = queryParams.get('serverId');
-  const discordId = queryParams.get('discordId');
+
+
+
+  console.log("Server id: ", serverId)
+  console.log("Discord id: ", discordId)
 
   return (
     <Main>
@@ -73,13 +84,14 @@ export default function Home() {
               setVerifying(true);
               setZkConnectResponse(response);
               axios
-                .post(`http://localhost:3333/`+ serverId +`/verify`, {
-                  discordId: discordId,
+                .post(`http://localhost:3333/`+ localStorage.getItem("serverId") +`/verify`, {
+                  discordId: localStorage.getItem("discordId"),
                   zkConnectResponse: response,
                 })
                 .then((res) => {
+                  console.log(res)
                   setVerifying(false);
-                  setSubscriptionStatus(res.data.status);
+                  setSubscriptionStatus(SubscriptionStatus.AlreadySubscribed);
                 })
                 .catch((err) => {
                   setVerifying(false);
@@ -93,11 +105,10 @@ export default function Home() {
         </>
       )}
       {subscriptionStatus && (
-        <DiscordForm
-          onSubmitDiscordId={onSubmitDiscordId}
-          subscriptionStatus={subscriptionStatus}
-        />
+        <Title>You are officially a Giccio in the square</Title>
       )}
     </Main>
   );
 }
+
+export default App;
