@@ -12,12 +12,12 @@ enum Status {
 type Data = { 
   status: Status,
   userId?: string,
-  email?: string,
+  discordId?: string,
   message?: string
 }
 
 const zkConnectConfig: ZkConnectServerConfig = {
-  appId: "0x112a692a2005259c25f6094161007967",
+  appId: process.env.NEXT_PUBLIC_APP_ID,
   devMode: {
     enabled: process.env.NEXT_PUBLIC_ENV_NAME === "LOCAL", 
   }
@@ -32,27 +32,27 @@ const authRequest = {
   authType: AuthType.ANON,
 };
 
-const emailMemoryStore = new Map();
+const discordMemoryStore = new Map();
 
 export default async function handler(
   req: NextApiRequest,
-  res: NextApiResponse<Data>
+  res: NextApiResponse<any>
 ) {
 
-  const { email, zkConnectResponse } = req.body;
+  const { discordId, zkConnectResponse } = req.body;
 
   try {
     const { verifiedAuths } = await zkConnect.verify(zkConnectResponse, {
-      authRequest,
-      claimRequest,
+      authRequest
+      // claimRequest,  // not needed for anon auth
     });
     const userId =  verifiedAuths[0].userId;
-    // if email is not provided, check if the user is already subscribed
-    if (!email) {
-      if (emailMemoryStore.has(userId)) {
-        const existingEmail = emailMemoryStore.get(userId);
+    // if discord id is not provided, check if the user is already subscribed
+    if (!discordId) {
+      if (discordMemoryStore.has(userId)) {
+        const existingDiscordId = discordMemoryStore.get(userId);
         res.status(200).send({
-          email: existingEmail,
+          email: existingDiscordId,
           userId,
           status: Status.AlreadySubscribed,
         });
@@ -60,9 +60,16 @@ export default async function handler(
       }
       res.status(200).send({ status: Status.NotSubscribed, userId });
     } else {
-      emailMemoryStore.set(userId, email);
-      res.status(200).send({ email, status: Status.Success, userId });
+      discordMemoryStore.set(userId, discordId);
+      res.status(200).send({ discordId, status: Status.Success, userId });
     }
+    // console.log("verified auths", verifiedAuths) 
+    // // console.log(zkConnectResponse.proofs[0].claim)
+    // res.status(200).send({ 
+    //   status: Status.Success, 
+    //   userId,
+    //   response: zkConnectResponse 
+    // });
   } catch (e: any) {
     //If the response is not valid
     res.status(400).send({ status: Status.Error, message: e.message });

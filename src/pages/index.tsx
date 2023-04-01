@@ -1,4 +1,4 @@
-import EmailForm from "@/components/EmailForm";
+import DiscordForm from "@/components/DiscordForm";
 import { Main } from "@/components/Main";
 import Search from "@/components/Search";
 import { Subtitle } from "@/components/Subtitle";
@@ -13,20 +13,20 @@ import axios from "axios";
 import { useState } from "react";
 
 export const zkConnectConfig: ZkConnectClientConfig = {
-  appId: "0x112a692a2005259c25f6094161007967",
+  appId: process.env.NEXT_PUBLIC_APP_ID,
   devMode: {
     // enable or disable dev mode here to create development groups and use the development vault.
     enabled: process.env.NEXT_PUBLIC_ENV_NAME === "LOCAL" ? true : false,
-    devGroups: [
-      {
-        groupId: "0x42c768bb8ae79e4c5c05d3b51a4ec74a",
-        // Add your dev addresses here to become eligible in the DEV env
-        data: [
-          "0x2bf7b04f143602692bbdc3ecbea68c2c65278eee",
-          "0x3f559454185098cb3a496f864a4bdd82b34c7fd1",
-        ],
-      },
-    ],
+    // devGroups: [
+    //   {
+    //     groupId: "0x42c768bb8ae79e4c5c05d3b51a4ec74a",
+    //     // Add your dev addresses here to become eligible in the DEV env
+    //     data: [
+    //       "0x2bf7b04f143602692bbdc3ecbea68c2c65278eee",
+    //       "0x3f559454185098cb3a496f864a4bdd82b34c7fd1",
+    //     ],
+    //   },
+    // ],
   },
 };
 
@@ -37,36 +37,34 @@ enum SubscriptionStatus {
 
 export default function Home() {
   const [verifying, setVerifying] = useState(false);
-  const [subscriptionStatus, setSubscriptionStatus] =
-    useState<SubscriptionStatus | null>(null);
-  const [zkConnectResponse, setZkConnectResponse] =
-    useState<ZkConnectResponse | null>(null);
+  const [subscriptionStatus, setSubscriptionStatus] = useState<SubscriptionStatus | null>(null);
+  const [zkConnectResponse, setZkConnectResponse] = useState<ZkConnectResponse | null>(null);
 
-  async function onSubmitEmail(email: string) {
-    return await axios.post(`/api/subscribe`, {
-      email,
+  async function onSubmitDiscordId(discordId: string) {
+    console.log("Submitting discord id: ", discordId);
+    const res = await axios.post(`/api/subscribe`, {
+      discordId: discordId,
       zkConnectResponse,
     });
+
+    return res;
   }
+
+  console.log("APP id: ", process.env.NEXT_PUBLIC_APP_ID)
+  console.log("Subscription status: ", subscriptionStatus)
 
   return (
     <Main>
       {!subscriptionStatus && (
         <>
-          <Title>The Merge Contributors mailing list</Title>
-          <Subtitle style={{ marginBottom: 30 }}>
-            Contributors to The Merge can register their email addresses in a
-            privacy-preserving manner—gaining access to exclusive tickets for
-            web3 events.
-          </Subtitle>
-          <Search groupId="0x42c768bb8ae79e4c5c05d3b51a4ec74a" />
+          <Title>Giccio in the square APP. Are you a Giccio?</Title>
           <ZkConnectButton
             config={zkConnectConfig}
-            claimRequest={{
-              //The merge contributor groupId
-              groupId: "0x42c768bb8ae79e4c5c05d3b51a4ec74a",
-            }}
             authRequest={{authType: AuthType.ANON}}
+            // claimRequest={{
+            //   //The merge contributor groupId
+            //   groupId: "0x42c768bb8ae79e4c5c05d3b51a4ec74a",
+            // }}
             onResponse={(response) => {
               setVerifying(true);
               setZkConnectResponse(response);
@@ -90,8 +88,8 @@ export default function Home() {
         </>
       )}
       {subscriptionStatus && (
-        <EmailForm
-          onSubmitEmail={onSubmitEmail}
+        <DiscordForm
+          onSubmitDiscordId={onSubmitDiscordId}
           subscriptionStatus={subscriptionStatus}
         />
       )}
