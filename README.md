@@ -1,67 +1,53 @@
-<br />
+# Sismord Frontend
+
 <div align="center">
-  <img src="https://static.sismo.io/readme/top-main.png" alt="Logo" width="150" height="150" style="borderRadius: 20px">
+  <img src="src/discordchads.svg" alt="Logo" width="150" height="150" style="borderRadius: 20px">
 
   <h3 align="center">
-    zkSub
+    Sismord
   </h3>
 
   <p align="center">
-    Made by <a href="https://www.docs.sismo.io/" target="_blank">Sismo</a>
+    Made by <a href="https://github.com/0xCaso" target="_blank">0xCaso</a> & <a href="https://github.com/mmatteo23" target="_blank">mmatteo23</a></a>
   </p>
   
   <p align="center">
-    <a href="https://discord.gg/uAPtsfNrve" target="_blank">
+    <a href="https://discord.gg/jm2TWpTY" target="_blank">
         <img src="https://img.shields.io/badge/Discord-7289DA?style=for-the-badge&logo=discord&logoColor=white"/>
-    </a>
-    <a href="https://twitter.com/sismo_eth" target="_blank">
-        <img src="https://img.shields.io/badge/Twitter-1DA1F2?style=for-the-badge&logo=twitter&logoColor=white"/>
     </a>
   </p>
   <a href="https://www.sismo.io/" target="_blank"></a>
 </div>
 
-The zkSub app allows to register users to a mailing list once they have privately authenticate themselves with [zkConnect](https://github.com/sismo-core/zk-connect-packages) single sign-on. 
+## Local setup
 
-This repository is a fork of the [zksub](https://github.com/sismo-core/zksub) repository translated from React to Next.js and simplified to help you using zkConnect with Next.js.
+To execute the whole application locally, there are two paths:
 
-The repository is build with Next.js using:
-- In the `frontend` we use the [zk-connect-react](https://github.com/sismo-core/zk-connect-packages) package to redirect the user to Sismo Vault App to generate a zero-knowledge proof. Once the proof is generated, the user is redirected back to zkSub and the proof is sent to the backend. 
-- In the `backend`, we use the [zk-connect-server](https://github.com/sismo-core/zk-connect-packages) package to verify that the proof is valid. If that's the case, the user is registered to the mailing list.
+### Ways to run the application
+1. Create your own Discord bot and server, and fill the `.env` file with your values. To do so, follow the instructions in the [Discord Developer Portal](https://discord.com/developers/docs/intro) and create an [application](https://discord.com/developers/applications) with a bot (the bot should be able to manage roles and send messages). You should also add a specific role in the server, which should match the role added by the Sismord bot (you have to set its name inside the `.env` file).
+2. Contact us and we will provide you with a bot token and a server ID. You can then fill the `.env` file with the provided values.
 
-You can see a deployed demo app at [https://demo.zksub.io/](https://demo.zksub.io/).
+### Steps to run the application
+The steps to run the application are the following:
+1. Clone the [Sismord bot repository](https://github.com/0xCaso/zkhack-lisbon-discord-bot) (follow the readme instructions to set up the bot).
+2. Clone this repository and install the dependencies:
+    ```bash
+    git clone https://github.com/mmatteo23/zkhack-lisbon-frontend
+    cd zkhack-lisbon-frontend
+    yarn
+    ```
+3. Create the `.env` file and fill it with the correct values:
+    ```bash
+    cp .env.example .env
+    ```
+4. Run the Sismord bot (follow its readme instructions)
+5. Run the Sismord frontend:
+    ```bash
+    yarn start
+    ```
 
-Here is a guide to integrate ZK Connect in your own application: [https://zk-connect-guide.sismo.io/](https://zk-connect-guide.sismo.io/).
-
-## Installation
-
-### Prerequisites
-
-- [Node.js](https://nodejs.org/en/download/) (v18.15.0, latest LTS version)
-- [Yarn](https://classic.yarnpkg.com/en/docs/install/#mac-stable)
-
-In a first terminal:
-```sh
-# Install dependencies
-yarn 
-
-# Start server on http://localhost:3000
-yarn dev
-```
-
-## Deploy on Vercel
-
-This zksub-next repository has been deployed on Vercel at [https://zksub-next.vercel.app/](https://zksub-next.vercel.app/)
-
-Here is how you can easily deploy yours: 
-
-1) Create an account on Vercel with your Github account
-
-2) Create a new project and import your zksub repository in Vercel
-
-3) Choose a project name and deploy it
-
-And that's it! 
-
-<br/>
-<img src="https://static.sismo.io/readme/bottom-main.png" alt="bottom" width="100%" >
+Now you're ready to test the application. You can follow these steps:
+1. Join the Discord server using the invite link (if you are following the 2nd path, our test discord channel is [here](https://discord.gg/jm2TWpTY), otherwise you have to join the server you created).
+2. The bot will send you a message with a link that redirects to the Sismord frontend. Click on the link to go to the verification process.
+3. Follow the zkConnect flow to verify your identity.
+4. Go back to the Discord channel and you should see a new role assigned to you (in case you followed the 2nd path, you should see the `chad` role, and a channel accessible only if you have that role).

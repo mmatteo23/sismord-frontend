@@ -145,16 +145,16 @@ const PaperclipWrapper = styled.div`
 `;
 
 type Props = {
-  onSubmitEmail: (email: string) => Promise<AxiosResponse>;
+  onSubmitDiscordId: (discordId: string) => Promise<AxiosResponse>;
   subscriptionStatus: "not-subscribed" | "already-subscribed";
 };
 
-export default function EmailForm({
-  onSubmitEmail,
+export default function DiscordForm({
+  onSubmitDiscordId,
   subscriptionStatus,
 }: Props): JSX.Element {
-  const [enteredEmail, setEnteredEmail] = useState("");
-  const [emailError, setEmailError] = useState("");
+  const [enteredDiscordId, setEnteredDiscordId] = useState("");
+  const [discordIdError, setDiscordIdError] = useState("");
   const [status, setStatus] = useState<
     | "not-subscribed"
     | "success"
@@ -164,28 +164,31 @@ export default function EmailForm({
   >(subscriptionStatus);
   const [loading, setLoading] = useState(false);
 
-  function onEmailChange(event: React.ChangeEvent<HTMLInputElement>) {
-    if (emailError) setEmailError("");
-    const email = event.target.value;
-    setEnteredEmail(email);
+  function onDiscordIdChange(event: React.ChangeEvent<HTMLInputElement>) {
+    if (discordIdError) setDiscordIdError("");
+    const discordId = event.target.value;
+    setEnteredDiscordId(discordId);
   }
 
-  async function validateEmail(email: string) {
-    const re = /\S+@\S+\.\S+/;
-    if (!re.test(email)) {
-      setEmailError("Invalid email address");
-      return false;
-    }
+  async function validateDiscordId(id: string) {
+    // const re = /\S+@\S+\.\S+/;
+    // if (!re.test(email)) {
+    //   setEmailError("Invalid email address");
+    //   return false;
+    // }
     return true;
   }
 
-  async function submitEmail() {
-    const isEmailValid = await validateEmail(enteredEmail);
-    if (!enteredEmail || !isEmailValid) return;
+  async function submitDiscordId() {
+    console.log("Entered discord id: ", enteredDiscordId);
+    const isDiscordIdValid = await validateDiscordId(enteredDiscordId);
+    if (!enteredDiscordId || !isDiscordIdValid) return;
 
     try {
       setLoading(true);
-      const res = await onSubmitEmail(enteredEmail);
+      const res = await onSubmitDiscordId(enteredDiscordId);
+      console.log("res: ", res.data.status);
+      console.log("status: ", status);
       if (status === "not-subscribed" && res.data.status === "success") {
         setStatus("success");
         setLoading(false);
@@ -194,9 +197,11 @@ export default function EmailForm({
         setStatus("update-success");
         setLoading(false);
       }
+
+
     } catch (err) {
       setLoading(false);
-      setEmailError("Something went wrong, please try again later");
+      setDiscordIdError("Something went wrong, please try again later");
     }
   }
 
@@ -205,24 +210,23 @@ export default function EmailForm({
       {status === "not-subscribed" && (
         <>
           <EligibleTitle>you are eligible</EligibleTitle>
-          <Subtitle>for premium access to web3 events</Subtitle>
+          <Subtitle>for privilege access to exclusive Discord channels</Subtitle>
           <EligibleText>
-            Enter an email to receive exclusive access to reserved tickets for
-            upcoming web3 events.
+            Enter your Discord id to access to the them.
           </EligibleText>
           <Input
             style={{ marginBottom: 20 }}
-            label="Email Address"
-            value={enteredEmail}
-            onChange={onEmailChange}
-            error={emailError}
-            placeholder={"Enter your email address"}
+            label="Discord Id"
+            value={enteredDiscordId}
+            onChange={onDiscordIdChange}
+            error={discordIdError}
+            placeholder={"Enter your Discord id"}
           />
           <CallToAction>
             <StyledButton
               loading={loading}
               onClick={() => {
-                submitEmail();
+                submitDiscordId();
               }}
             >
               {loading ? "submitting..." : "submit"}
@@ -241,7 +245,7 @@ export default function EmailForm({
         <>
           <CongratsTitle>Congratulations</CongratsTitle>
           <Text>
-            {enteredEmail} has been registered to the Contributors to The Merge
+            {enteredDiscordId} has been registered to the Contributors to The Merge
             mailing list.
           </Text>
         </>
@@ -259,30 +263,30 @@ export default function EmailForm({
               setStatus("update");
             }}
           >
-            update email
+            update discord id
           </StyledButton>
         </>
       )}
       {status === "update" && (
         <>
-          <UpdateTitle>update email</UpdateTitle>
+          <UpdateTitle>update discord id</UpdateTitle>
           <UpdateText>
-            Enter a new email to receive exclusive access to reserved tickets
+            Enter a new Discord id to receive exclusive access to reserved tickets
             for the web3 events.
           </UpdateText>
           <Input
             style={{ marginBottom: 20 }}
-            label="Email Address"
-            value={enteredEmail}
-            onChange={onEmailChange}
-            error={emailError}
-            placeholder={"Enter your email address"}
+            label="Discord Id"
+            value={enteredDiscordId}
+            onChange={onDiscordIdChange}
+            error={discordIdError}
+            placeholder={"Enter your Discord id"}
           />
           <CallToAction>
             <StyledButton
               loading={loading}
               onClick={() => {
-                submitEmail();
+                submitDiscordId();
               }}
             >
               {loading ? "submitting..." : "submit"}
@@ -295,7 +299,7 @@ export default function EmailForm({
           <Title>
             You have successfully
             <br />
-            updated your email
+            updated your Discord id
             <br />
             address
           </Title>

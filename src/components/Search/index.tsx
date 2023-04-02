@@ -4,7 +4,7 @@ import { MagnifyingGlass } from "phosphor-react";
 import colors from "../../theme/colors";
 import { Shard, ShardGroup } from "../SismoReactIcon";
 import { useZkConnect } from "@sismo-core/zk-connect-react";
-import { zkConnectConfig } from "@/pages";
+import { zkConnectConfig } from "../../App";
 
 const Container = styled.div`
   width: 100%;
