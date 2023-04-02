@@ -6,7 +6,7 @@ export const Title = styled.div`
   width: 654px;
   text-align: center;
   margin-bottom: 20px;
-  color: white;
+  margin-top: 20px;
 
   @media (max-width: 800px) {
     font-size: 40px;

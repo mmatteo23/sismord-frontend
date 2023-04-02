@@ -11,6 +11,8 @@ import {
 import { Main } from './components/Main';
 import { Title } from './components/Title';
 import axios from 'axios';
+import { Subtitle } from './components/Subtitle';
+import {ReactComponent as DiscordChads} from './discordchads.svg';
 
 export const zkConnectConfig: ZkConnectClientConfig = {
   appId: process.env.REACT_APP_APP_ID as string,
@@ -72,7 +74,9 @@ function App() {
     <Main>
       {!subscriptionStatus && (
         <>
-          <Title>Giccio in the square APP. Are you a Giccio?</Title>
+          {/* put the img discordchads.svg */}
+          <DiscordChads style={{width: "30%", height: "30%"}}/>
+          <Title id="title">Verify your profile to gain access to the exclusive server ⚡</Title>
           <ZkConnectButton
             config={zkConnectConfig}
             authRequest={{authType: AuthType.ANON}}
@@ -100,12 +104,20 @@ function App() {
             verifying={verifying}
             overrideStyle={{
               marginTop: 30,
+              background: "#715aff",
+              border: "1px solid #8b8b8b"
             }}
           />
         </>
       )}
       {subscriptionStatus && (
-        <Title>You are officially a Giccio in the square</Title>
+        <>
+          <DiscordChads style={{width: "30%", height: "30%"}}/>
+          <Title>You are officially a member of the Discord server!</Title>
+          <Subtitle id="success-subtitle">
+            If you come back to it, you can see you gained the special role <b>Chad</b> 🗿🍷
+          </Subtitle>
+        </>
       )}
     </Main>
   );
