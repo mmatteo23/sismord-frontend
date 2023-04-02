@@ -13,7 +13,7 @@ import { Subtitle } from './components/Subtitle';
 import {ReactComponent as DiscordChads} from './discordchads.svg';
 
 export const zkConnectConfig: ZkConnectClientConfig = {
-  appId: process.env.REACT_APP_APP_ID as string,
+  appId: process.env.REACT_APP_SISMO_APP_ID as string,
   devMode: {
     // enable or disable dev mode here to create development groups and use the development vault.
     enabled: process.env.REACT_APP_ENV_NAME === "LOCAL" ? true : false,
