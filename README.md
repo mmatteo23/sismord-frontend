@@ -24,7 +24,7 @@
 To execute the whole application locally, there are two paths:
 
 ### Ways to run the application
-1. Create your own Discord bot and server, and fill the `.env` file with your values. To do so, follow the instructions in the [Discord Developer Portal](https://discord.com/developers/docs/intro) and create an [application](https://discord.com/developers/applications) with a bot (the bot should be able to manage roles and send messages). You should also add a specific role in the server, which should match the role added by the bot.
+1. Create your own Discord bot and server, and fill the `.env` file with your values. To do so, follow the instructions in the [Discord Developer Portal](https://discord.com/developers/docs/intro) and create an [application](https://discord.com/developers/applications) with a bot (the bot should be able to manage roles and send messages). You should also add a specific role in the server, which should match the role added by the Sismord bot (you have to set its name inside the `.env` file).
 2. Contact us and we will provide you with a bot token and a server ID. You can then fill the `.env` file with the provided values.
 
 ### Steps to run the application
@@ -50,4 +50,4 @@ Now you're ready to test the application. You can follow these steps:
 1. Join the Discord server using the invite link (if you are following the 2nd path, our test discord channel is [here](https://discord.gg/jm2TWpTY), otherwise you have to join the server you created).
 2. The bot will send you a message with a link that redirects to the Sismord frontend. Click on the link to go to the verification process.
 3. Follow the zkConnect flow to verify your identity.
-4. Go back to the Discord channel and you should see a new role assigned to you (in case you followed the 2nd path, you should see the `chad` role).
+4. Go back to the Discord channel and you should see a new role assigned to you (in case you followed the 2nd path, you should see the `chad` role, and a channel accessible only if you have that role).
