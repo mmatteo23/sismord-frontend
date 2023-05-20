@@ -4,7 +4,7 @@ import { MagnifyingGlass } from "phosphor-react";
 import colors from "../../theme/colors";
 import { Shard, ShardGroup } from "../SismoReactIcon";
 import { useZkConnect } from "@sismo-core/zk-connect-react";
-import { zkConnectConfig } from "../../App";
+import { zkConnectConfig } from "../../routes/User";
 
 const Container = styled.div`
   width: 100%;
@@ -156,7 +156,6 @@ export default function Search({ groupId }: Props): JSX.Element {
       <Container>
         <Label>
           <ShardGroup size={24} color={"white"} strokeWidth={2.2} />
-
           Are you a contributor to The Merge?
         </Label>
         <SearchInputWrapper>
