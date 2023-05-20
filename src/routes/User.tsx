@@ -13,38 +13,18 @@ import axios from 'axios';
 import { Subtitle } from '../components/Subtitle';
 import {ReactComponent as DiscordChads} from './../discordchads.svg';
 
-// export const zkConnectConfig: ZkConnectClientConfig = {
-//   appId: process.env.REACT_APP_SISMO_APP_ID as string,
-//   devMode: {
-//     // enable or disable dev mode here to create development groups and use the development vault.
-//     enabled: process.env.REACT_APP_ENV_NAME === "LOCAL" ? true : false,
-//     devGroups: [
-//       {
-//         groupId: process.env.REACT_APP_GROUP_ID as string,
-//         // Add your dev addresses here to become eligible in the DEV env
-//         data: [
-//           "0x3E612Ca41B0212c741ED7BdEE37B17a8CcefBcb4",
-//           "0x5853bCAC824fc455C1e448706419633EFc452bC8",
-//         ],
-//       },
-//     ],
-//   },
-// };
-
-export const sismoConnectConfig: SismoConnectClientConfig = {
-  appId: process.env.REACT_APP_SISMO_APP_ID as string,
-  devMode: {
-    // enable or disable dev mode here to create development groups and use the development vault.
-    enabled: process.env.REACT_APP_ENV_NAME === "LOCAL" ? true : false,
-  },
-};
-
 export const GITCOIN_PASSPORT_HOLDERS_GROUP_ID = "0x1cde61966decb8600dfd0749bd371f12";
-const NOUNS_DAO_HOLDERS_GROUP_ID = "0x311ece950f9ec55757eb95f3182ae5e2";
 
 enum SubscriptionStatus {
   AlreadySubscribed = "already-subscribed",
   NotSubscribed = "not-subscribed",
+}
+
+interface groupIdsObject {
+  // groupId: value
+  // example:
+  // `${GITCOIN_GROUP_ID}`: MINPASSPORT_VALUE,
+  [key: string]: number
 }
 
 function User() {
@@ -58,17 +38,81 @@ function User() {
   const searchParams = new URLSearchParams(document.location.search)
   
   useEffect(() => {
-    if (searchParams.get("serverId") && searchParams.get("discordId")) {
+    if (searchParams.get("serverId") && searchParams.get("userId")) {
       const serverId = searchParams.get("serverId")
-      const discordId = searchParams.get("discordId")
+      const userId = searchParams.get("userId")
+      const role = searchParams.get("role")
+      const groupIds = searchParams.get("groupIds")
       localStorage.setItem("serverId", serverId as string)
-      localStorage.setItem("discordId", discordId as string + "#" + (document.location.href).split("#")[1])
+      localStorage.setItem("userId", userId as string + "#" + (document.location.href).split("#")[1])
+      localStorage.setItem("role", role as string)
+      let groupIdsObject: groupIdsObject = {}
+      if (groupIds?.includes(";")) {
+        const groupIdsArray = groupIds.split(";")
+        groupIdsArray.forEach(groupId => {
+          if (groupId.includes(":")) {
+            const groupIdArray = groupId.split(":")
+            groupIdsObject[groupIdArray[0]] = +groupIdArray[1]
+          } else {
+            groupIdsObject[groupId] = -1
+          }
+        })
+      } else {
+        if (groupIds?.includes(":")) {
+          const groupIdArray = groupIds?.split(":")
+          groupIdsObject[groupIdArray[0]] = +groupIdArray[1]
+        } else {
+          groupIdsObject[groupIds as string] = -1
+        }
+      }
+      localStorage.setItem("groupIds", JSON.stringify(groupIdsObject))
     } 
 
-    if (localStorage.getItem("serverId") && localStorage.getItem("discordId")) {
+    if (localStorage.getItem("serverId") && localStorage.getItem("userId")) {
       setValidPage(true)
     }
   }, [searchParams])
+
+  // build the claims list
+  // if the groupId associated value is -1, it's just groupId: "GROUP_ID"
+  // otherwise, it's like { groupId: GITCOIN_PASSPORT_HOLDERS_GROUP_ID, value: 1, claimType: ClaimType.GTE },
+  const claimsList = () => {
+    let list = []
+    const groupIdsObject = JSON.parse(localStorage.getItem("groupIds") as string)
+    for (const groupId in groupIdsObject) {
+      if (groupIdsObject[groupId] === -1) {
+        list.push({ groupId: groupId })
+      } else {
+        list.push({ groupId: groupId, value: groupIdsObject[groupId], claimType: ClaimType.GTE })
+      }
+    }
+    return list
+  }
+
+  let sismoConnectConfig: SismoConnectClientConfig = {
+    appId: process.env.REACT_APP_SISMO_APP_ID as string,
+    devMode: {
+      enabled: process.env.REACT_APP_ENV_NAME === "LOCAL" ? true : false,
+      // add this line to override the "Gitcoin Passport Holders" group
+      // devGroups: [
+      //   // {
+      //   //   groupId: GITCOIN_PASSPORT_HOLDERS_GROUP_ID,
+      //   //   data: [
+      //   //     "0x5853bCAC824fc455C1e448706419633EFc452bC8",
+      //   //   ],
+      //   // },
+      // ],
+    },
+  };
+
+  claimsList().forEach(claim => {
+    sismoConnectConfig.devMode?.devGroups?.push({
+      groupId: claim.groupId,
+      data: [
+        "0x5853bCAC824fc455C1e448706419633EFc452bC8",
+      ],
+    })
+  })
 
   if(!validPage) {
     return (
@@ -88,20 +132,16 @@ function User() {
             <SismoConnectButton
               config={sismoConnectConfig}
               auths={[{ authType: AuthType.VAULT }]}
-              // request an additional proof of group membership from your users
-              // They should hold a Nouns DAO NFT
-              // but also the Gitcoin Passport as before
-              claims={[
-                { groupId: GITCOIN_PASSPORT_HOLDERS_GROUP_ID, value: 15, claimType: ClaimType.GTE },
-                { groupId: NOUNS_DAO_HOLDERS_GROUP_ID } // <-- pass the groupId
-              ]}
-              // signature={{ message: signMessage(address) }}
+              claims={claimsList()}
               onResponse={(response) => {
                 setVerifying(true);
                 setSismoConnectResponse(response);
                 axios
-                  .post(`http://localhost:3333/`+ localStorage.getItem("serverId") +`/verify`, {
-                    discordId: localStorage.getItem("discordId"),
+                  .post(`http://localhost:3333/api/discord/verifyResponse`, {
+                    userId: localStorage.getItem("userId"),
+                    serverId: localStorage.getItem("serverId"),
+                    discordRole: localStorage.getItem("role"),
+                    groupIds: localStorage.getItem("groupIds"),
                     sismoConnectResponse: response,
                   })
                   .then((res) => {
