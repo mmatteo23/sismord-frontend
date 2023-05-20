@@ -24,8 +24,12 @@
 To execute the whole application locally, there are two paths:
 
 ### Ways to run the application
-1. Create your own Discord bot and server, and fill the `.env` file with your values. To do so, follow the instructions in the [Discord Developer Portal](https://discord.com/developers/docs/intro) and create an [application](https://discord.com/developers/applications) with a bot (the bot should be able to manage roles and send messages). You should also add a specific role in the server, which should match the role added by the Sismord bot (you have to set its name inside the `.env` file).
-2. Contact us and we will provide you with a bot token and a server ID. You can then fill the `.env` file with the provided values.
+1. Create your own Discord server, and in the server settings create a new role with the same name as the one you have defined in the `.env` file (for example 'chad'). 
+2. Create an [application](https://discord.com/developers/applications) with a bot, copy the Application ID and it will be your DISCORD_CLIENT_ID env variable in the `.env` file.
+3. In the application at the Bot page, allow all the "Privileged Gateway Intents" and click "Save changes". 
+4. In the application at the Bot page, click "Reset Token" to create a new bot token, and it will be your DISCORD_BOT_TOKEN env variable in the `.env` file.
+5. In the application at OAuth2 > Url generator, to set up the OAuth2 flow, in **SCOPES** select "bot" and in **BOT PERMISSIONS** set "Manage Roles" and "Send Messages". Copy the "generated URL" and paste it into a new tab in the browser, add the bot to your new server and authorize it.
+6. Now your bot is in your server and can verify the membership of new users with Sismo!!
 
 ### Steps to run the application
 The steps to run the application are the following:
