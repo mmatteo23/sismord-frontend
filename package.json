@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@sismo-core/sismo-connect-react": "^0.0.13",
     "@sismo-core/zk-connect-react": "^0.0.4",
     "@sismo-core/zk-connect-server": "^0.0.4",
     "@testing-library/jest-dom": "^5.16.5",

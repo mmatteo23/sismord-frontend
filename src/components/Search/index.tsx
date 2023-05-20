@@ -3,8 +3,8 @@ import { useState, useEffect, useMemo } from "react";
 import { MagnifyingGlass } from "phosphor-react";
 import colors from "../../theme/colors";
 import { Shard, ShardGroup } from "../SismoReactIcon";
-import { useZkConnect } from "@sismo-core/zk-connect-react";
-import { zkConnectConfig } from "../../routes/User";
+import { useSismoConnect } from "@sismo-core/sismo-connect-react";
+import { sismoConnectConfig } from "../../routes/User";
 
 const Container = styled.div`
   width: 100%;
@@ -97,8 +97,8 @@ type Props = {
 export default function Search({ groupId }: Props): JSX.Element {
   const [isFocused, setIsFocused] = useState(false);
   const [searchValue, setSearchValue] = useState("");
-  const { zkConnect } = useZkConnect({
-    config: zkConnectConfig
+  const { sismoConnect } = useSismoConnect({
+    config: sismoConnectConfig
   });
 
   const [membersOfGroup, setMembersOfGroup] = useState<string[]>([]);
@@ -119,7 +119,7 @@ export default function Search({ groupId }: Props): JSX.Element {
     async function getMembersOfGroup() {
       try {
         setLoading(true);
-        const group = await zkConnect.getGroup({ id: groupId });
+        const group = await sismoConnect.getGroup({ id: groupId });
         const _membersOfGroup = convertObjectToStringArray(group.data);
         setMembersOfGroup(_membersOfGroup);
         setLoading(false);
