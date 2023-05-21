@@ -7,7 +7,7 @@ import {
   getAllServersFromOwnerId,
   setAllServers,
 } from "../utils/backend";
-import {ReactComponent as DiscordChads} from '../discordchads.svg';
+import { ReactComponent as DiscordChads } from "../discordchads.svg";
 import styled from "styled-components";
 
 type IServerSettings = {
@@ -55,13 +55,14 @@ function convertOptionToClaim(
 }
 
 const Header = styled.header`
-  background-color: #2737e6;
   min-height: 10vh;
   display: flex;
   flex-direction: row;
+  flex: 1;
   align-items: center;
   justify-content: space-between;
-  color: white;
+  align-content: middle;
+  color: black;
   font-size: calc(10px + 2vmin);
   padding: 0 2rem;
 `;
@@ -71,9 +72,27 @@ const Container = styled.div`
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  background-color: #f5f5f5;
+  background-color: #5865f2;
+  max-width: 80vw;
+  margin: 2em auto;
+  padding: 1em;
+  border-radius: 16px;
+  color: white;
 `;
 
+const ContainerContent = styled.div`
+  width: 80%;
+  margin: 0 auto;
+`;
+
+const Table = styled.table`
+  width: 100%;
+  border-collapse: collapse;
+  border-spacing: 0;
+  margin: 0 auto;
+  margin-bottom: 2em;
+  border: 1px solid #000;
+`;
 
 const Servers: React.FC = () => {
   const [ownerId, setOwnerId] = useState<string>("0xFraye");
@@ -184,10 +203,16 @@ const Servers: React.FC = () => {
     setNewServerRole(e.target.value);
   };
 
+  const getGroupNameFromId = (id: string) => {
+    const group = serverClaimsOption.find((option) => option.value === id);
+    return group?.label;
+  };
   return (
     <>
       <Header className="navbar">
-        <div className="logo"><DiscordChads style={{width: "20%", height: "20%"}}/></div>
+        <div className="logo">
+          <DiscordChads style={{ width: "20%", height: "20%" }} />
+        </div>
         <div className="user">
           Hi{" "}
           <span style={{ color: "red", textDecoration: "underline" }}>
@@ -197,81 +222,221 @@ const Servers: React.FC = () => {
         </div>
       </Header>
       <Container>
-        <div className="servers">
+        <ContainerContent className="servers">
           <h2>Here are your servers</h2>
 
-          <table>
-            <thead>
-              <tr>
-                <th>Server Name</th>
-                <th></th>
-              </tr>
-            </thead>
-            <tbody>
-              {servers.map((server) => (
-                <tr key={server.id}>
-                  <tr>
-                    <td>{server.name}</td>
-                    <td>
-                      <button
-                        className="edit-server"
-                        onClick={() => handleEditServer(server.id)}
-                      >
-                        Edit Server
-                      </button>
-                    </td>
-                  </tr>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+          <div style={{ display: "flex", flexDirection: "column" }}>
+            {servers.map((server, index) => (
+              <div
+                key={server.id}
+                style={{
+                  display: "flex",
+                  flexDirection: "row",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  margin: "0.8em 0",
+                  padding: "0 1.2em",
+                  borderRadius: "12px",
+                  backgroundColor: "white",
+                  color: "black",
+                }}
+              >
+                <div>
+                  <span>#{index + 1}</span>
+                  <h2>{server.name}</h2>
+                </div>
+                <button
+                  style={{
+                    marginRight: "0.4em",
+                    padding: "1.2em",
+                    borderRadius: "16px",
+                    border: "1px solid",
+                    backgroundColor: "#E17E0D",
+                    color: "white",
+                    cursor: "pointer",
+                  }}
+                  onClick={() => handleEditServer(server.id)}
+                >
+                  Edit
+                </button>
+              </div>
+            ))}
+          </div>
+        </ContainerContent>
       </Container>
       {showEditModal && !!editServerId ? (
-          <>
-            <div className="modal-content">
-              <h3>Edit Server {newServerName}</h3>
-              <div
-                style={{ display: "flex", flexDirection: "column", flex: 1 }}
-              >
-                <label>Id: {editServerId}</label>
-                <label>Server name: {newServerName}</label>
+        <Container>
+          <ContainerContent className="modal-content">
+            <h3>Edit Server {newServerName}</h3>
+            <form
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                width: "100%",
+              }}
+              onSubmit={handleSaveEditServer}
+            >
+              <p>
+                <strong>Id:</strong> <code>{editServerId}</code>
+              </p>
+              <p>
+                <strong>Server name:</strong> {newServerName}
+              </p>
+              <br />
 
-                <label>
-                  Edit Claims with Server role:
-                  <select onChange={handleSelectServerRole}>
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "1em",
+                }}
+              >
+                <div
+                  style={{
+                    display: "flex",
+                    flexDirection: "row",
+                    gap: "1em",
+                  }}
+                >
+                  <p>
+                    Edit Group Claims for this server <strong>role</strong>:
+                  </p>
+                  <select
+                    onChange={handleSelectServerRole}
+                    style={{
+                      padding: "0.4em",
+                      border: "0px",
+                      borderRadius: "16px",
+                    }}
+                    required
+                  >
                     {discordRoles.map((role) => (
                       <option value={role} key={role}>
                         {role}
                       </option>
                     ))}
                   </select>
-                </label>
+                </div>
                 {showGitcoinValue && (
-                  <label>
+                  <div
+                    style={{
+                      display: "flex",
+                      flexDirection: "row",
+                      gap: "1em",
+                    }}
+                  >
                     Gitcoin Passport value:
                     <input
                       type="number"
                       placeholder="10"
                       onChange={(e) => setGitcoinValue(+e.target.value)}
                       required={showGitcoinValue}
+                      style={{
+                        padding: "0.4em",
+                        border: "0px",
+                        borderRadius: "16px",
+                      }}
                     />
-                  </label>
+                  </div>
                 )}
-                <label>
-                  Groups:
+
+                <div style={{ color: "black" }}>
+                  <span style={{ color: "white" }}>Groups:</span>
                   <SelectMultiple
                     options={serverClaimsOption}
                     selected={selectedNewServerOption}
                     setSelected={setSelectedNewServerOption}
                   />
-                </label>
-                <button onClick={handleSaveEditServer}>Save</button>
-                <button onClick={handleCloseEditModal}>Cancel</button>
+                </div>
               </div>
-            </div>
-          </>
-        ) : null}
+
+              <div>
+                <h3>Current Roles and Claims</h3>
+                {newServerRoles.map((claim: IClaimsPerRole) => {
+                  const role = Object.keys(claim)[0];
+                  const claims = claim[role];
+                  return (
+                    <>
+                      <div
+                        key={role}
+                        style={{
+                          display: "flex",
+                          flexDirection: "row",
+                          justifyContent: "space-between",
+                        }}
+                      >
+                        <div>
+                          Role: <strong>{role}</strong>
+                        </div>
+                        <div>
+                          {claims.map((claim: IServerClaim) => (
+                            <div
+                              key={claim.id}
+                              style={{
+                                display: "flex",
+                                flexDirection: "column",
+                                justifyContent: "space-between",
+                                gap: "0.2em",
+                              }}
+                            >
+                              <div>
+                                <strong>{getGroupNameFromId(claim.id)}</strong>
+                              </div>
+                              <code>{claim.id}</code>
+                              <div>
+                                Group value: <span>{claim.value}</span>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                      <hr />
+                    </>
+                  );
+                })}
+              </div>
+
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "row",
+                  justifyContent: "space-between",
+                  margin: "1em 0",
+                }}
+              >
+                <button
+                  type="submit"
+                  style={{
+                    width: "45%",
+                    padding: "1.2em",
+                    backgroundColor: "green",
+                    border: "0px solid ",
+                    borderRadius: "16px",
+                    color: "white",
+                    fontWeight: "bold",
+                  }}
+                >
+                  SAVE
+                </button>
+                <button
+                  onClick={handleCloseEditModal}
+                  style={{
+                    width: "45%",
+                    padding: "1.2em",
+                    backgroundColor: "red",
+                    border: "0px solid",
+                    borderRadius: "16px",
+                    color: "white",
+                    fontWeight: "bold",
+                  }}
+                >
+                  CANCEL
+                </button>
+              </div>
+            </form>
+          </ContainerContent>
+        </Container>
+      ) : null}
     </>
   );
 };
