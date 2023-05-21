@@ -23,8 +23,13 @@ enum SubscriptionStatus {
 interface groupIdsObject {
   // groupId: value
   // example:
-  // `${GITCOIN_GROUP_ID}`: MINPASSPORT_VALUE,
-  [key: string]: number
+  // `${GITCOIN_GROUP_ID}`: MIN_PASSPORT_VALUE,
+  [key: string]: number | undefined
+}
+
+export interface ServerClaim {
+  id: string,
+  value: number | undefined
 }
 
 function User() {
@@ -38,39 +43,30 @@ function User() {
   const searchParams = new URLSearchParams(document.location.search)
   
   useEffect(() => {
+    let serverId, userId, role
     if (searchParams.get("serverId") && searchParams.get("userId")) {
-      const serverId = searchParams.get("serverId")
-      const userId = searchParams.get("userId")
-      const role = searchParams.get("role")
-      const groupIds = searchParams.get("groupIds")
+      serverId = searchParams.get("serverId")
+      userId = searchParams.get("userId")
+      role = searchParams.get("role")
       localStorage.setItem("serverId", serverId as string)
       localStorage.setItem("userId", userId as string + "#" + (document.location.href).split("#")[1])
       localStorage.setItem("role", role as string)
-      let groupIdsObject: groupIdsObject = {}
-      if (groupIds?.includes(";")) {
-        const groupIdsArray = groupIds.split(";")
-        groupIdsArray.forEach(groupId => {
-          if (groupId.includes(":")) {
-            const groupIdArray = groupId.split(":")
-            groupIdsObject[groupIdArray[0]] = +groupIdArray[1]
-          } else {
-            groupIdsObject[groupId] = -1
-          }
-        })
-      } else {
-        if (groupIds?.includes(":")) {
-          const groupIdArray = groupIds?.split(":")
-          groupIdsObject[groupIdArray[0]] = +groupIdArray[1]
-        } else {
-          groupIdsObject[groupIds as string] = -1
-        }
-      }
-      localStorage.setItem("groupIds", JSON.stringify(groupIdsObject))
     } 
 
     if (localStorage.getItem("serverId") && localStorage.getItem("userId")) {
       setValidPage(true)
     }
+
+    let query = `serverId=${serverId}&role=${role}`
+
+    axios
+      .get(`http://localhost:3333/api/discord/getServerGroupIds?${query}`)
+      .then((res) => {
+        localStorage.setItem("groups", JSON.stringify(res.data))
+      })
+      .catch((err) => {
+        console.log(err)
+      })
   }, [searchParams])
 
   // build the claims list
@@ -78,12 +74,12 @@ function User() {
   // otherwise, it's like { groupId: GITCOIN_PASSPORT_HOLDERS_GROUP_ID, value: 1, claimType: ClaimType.GTE },
   const claimsList = () => {
     let list = []
-    const groupIdsObject = JSON.parse(localStorage.getItem("groupIds") as string)
-    for (const groupId in groupIdsObject) {
-      if (groupIdsObject[groupId] === -1) {
-        list.push({ groupId: groupId })
+    const groups: ServerClaim[] = JSON.parse(localStorage.getItem("groups") as string)
+    for (const group of groups) {
+      if (group.value === undefined || group.value < 1) {
+        list.push({ groupId: group.id })
       } else {
-        list.push({ groupId: groupId, value: groupIdsObject[groupId], claimType: ClaimType.GTE })
+        list.push({ groupId: group.id, value: group.value, claimType: ClaimType.GTE })
       }
     }
     return list
@@ -114,6 +110,7 @@ function User() {
     })
   })
 
+  // TODO: should be if(validPage)
   if(!validPage) {
     return (
       <Main>
@@ -126,7 +123,6 @@ function User() {
         )}
         {(!subscriptionStatus && !botError) && (
           <>
-            {/* put the img discordchads.svg */}
             <DiscordChads style={{width: "30%", height: "30%"}}/>
             <Title id="title">Verify your profile to gain access to the exclusive server ⚡</Title>
             <SismoConnectButton
@@ -138,10 +134,10 @@ function User() {
                 setSismoConnectResponse(response);
                 axios
                   .post(`http://localhost:3333/api/discord/verifyResponse`, {
-                    userId: localStorage.getItem("userId"),
                     serverId: localStorage.getItem("serverId"),
-                    discordRole: localStorage.getItem("role"),
-                    groupIds: localStorage.getItem("groupIds"),
+                    userId: localStorage.getItem("userId"),
+                    role: localStorage.getItem("role"),
+                    claims: claimsList(),
                     sismoConnectResponse: response,
                   })
                   .then((res) => {
