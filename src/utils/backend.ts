@@ -2,9 +2,8 @@ import axios from 'axios';
 
 const BASE_URL = 'http://localhost:3333/api/discord';
 
-export const getAllDiscordRoles = async () => {
-  // TODO remove hardcoded serverId
-  const response = await axios.get(`${BASE_URL}/getDiscordRoles?serverId=1091856489985093685`);
+export const getAllDiscordRoles = async (serverId: string) => {
+  const response = await axios.get(`${BASE_URL}/getDiscordRoles?serverId=${serverId}`);
   return response.data;
 };
 

@@ -104,10 +104,16 @@ const Servers: React.FC = () => {
   );
   const [gitcoinValue, setGitcoinValue] = useState<number>(-1);
 
+  const [discordServerId, setDiscordServerId] = useState<string>(
+    "1091856489985093685"
+  );
+  const [showDiscordRoles, setShowDiscordRoles] = useState<boolean>(false);
+
   const [discordRoles, setDiscordRoles] = useState<string[]>([]);
   const [filteredRoles, setFilteredRoles] = useState<string[]>([]);
   const [selectedRoles, setSelectedRoles] = useState<string[]>([]);
 
+  const [showAddModal, setShowAddModal] = useState<boolean>(false);
   const [showEditModal, setShowEditModal] = useState<boolean>(false);
   const [showGitcoinValue, setShowGitcoinValue] = useState<boolean>(false);
 
@@ -129,10 +135,13 @@ const Servers: React.FC = () => {
 
   // onLoad get serverClaims and servers from backend
   useEffect(() => {
-    getAllDiscordRoles().then(setDiscordRoles);
     getServerGroups();
     getAllServersFromOwnerId(ownerId).then(setServers);
-  }, []);
+  }, [ownerId]);
+
+  useEffect(() => {
+    getAllDiscordRoles(discordServerId).then(setDiscordRoles);
+  }, [discordServerId]);
 
   // handle show correct server in showEdit
   useEffect(() => {
@@ -163,6 +172,12 @@ const Servers: React.FC = () => {
   const handleEditServer = (id: number) => {
     setEditServerId(id);
     setShowEditModal(true);
+    setShowAddModal(false);
+  };
+
+  const handleAddServer = () => {
+    setShowEditModal(false);
+    setShowAddModal(true);
   };
 
   const handleCloseEditModal = () => {
@@ -198,6 +213,40 @@ const Servers: React.FC = () => {
     setNewServerRole("");
   };
 
+  const handleSaveAddServer = () => {
+    if (!!editServerId) {
+      servers.push({
+        id: editServerId,
+        name: newServerName,
+        claims: [],
+      });
+      const newServers = servers.map((server) => {
+        if (server.id === editServerId) {
+          const newServerClaims: IServerClaim[] = selectedNewServerOption.map(
+            (option) => convertOptionToClaim(option, gitcoinValue)
+          );
+          const foundClaim = server.claims.find(
+            (claim: IClaimsPerRole) => claim[newServerRole]
+          );
+
+          if (foundClaim) {
+            server.claims.find(
+              (claim: IClaimsPerRole) =>
+                (claim[newServerRole] = newServerClaims)
+            );
+          } else {
+            server.claims.push({ [newServerRole]: newServerClaims });
+          }
+        }
+        return server;
+      });
+      setAllServers(ownerId, newServers);
+
+      setNewServerName("");
+      setNewServerRole("");
+    }
+  };
+
   const handleSelectServerRole = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setSelectedRoles([...selectedRoles, e.target.value]);
     setNewServerRole(e.target.value);
@@ -207,6 +256,12 @@ const Servers: React.FC = () => {
     const group = serverClaimsOption.find((option) => option.value === id);
     return group?.label;
   };
+
+  const handleDiscordServerId = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setDiscordServerId(e.target.value);
+    setShowDiscordRoles(true);
+  };
+
   return (
     <>
       <Header className="navbar">
@@ -217,13 +272,34 @@ const Servers: React.FC = () => {
           Hi{" "}
           <span style={{ color: "red", textDecoration: "underline" }}>
             {ownerId}
-          </span>
+          </span>{" "}
           !
         </div>
       </Header>
       <Container>
         <ContainerContent className="servers">
-          <h2>Here are your servers</h2>
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "row",
+              justifyContent: "space-between",
+            }}
+          >
+            <h2>Here are your servers</h2>
+            <button
+              style={{
+                padding: "1.2em",
+                border: "0px",
+                borderRadius: "16px",
+                backgroundColor: "green",
+                color: "white",
+                cursor: "pointer",
+              }}
+              onClick={handleAddServer}
+            >
+              Add new
+            </button>
+          </div>
 
           <div style={{ display: "flex", flexDirection: "column" }}>
             {servers.map((server, index) => (
@@ -250,7 +326,7 @@ const Servers: React.FC = () => {
                     marginRight: "0.4em",
                     padding: "1.2em",
                     borderRadius: "16px",
-                    border: "1px solid",
+                    border: "0px",
                     backgroundColor: "#E17E0D",
                     color: "white",
                     cursor: "pointer",
@@ -356,7 +432,215 @@ const Servers: React.FC = () => {
                   const role = Object.keys(claim)[0];
                   const claims = claim[role];
                   return (
+                    <div key={role}>
+                      <div
+                        style={{
+                          display: "flex",
+                          flexDirection: "row",
+                          justifyContent: "space-between",
+                        }}
+                      >
+                        <div>
+                          Role: <strong>{role}</strong>
+                        </div>
+                        <div>
+                          {claims.map((claim: IServerClaim) => (
+                            <div
+                              key={claim.id}
+                              style={{
+                                display: "flex",
+                                flexDirection: "column",
+                                justifyContent: "space-between",
+                                gap: "0.2em",
+                              }}
+                            >
+                              <div>
+                                <strong>{getGroupNameFromId(claim.id)}</strong>
+                              </div>
+                              <code>{claim.id}</code>
+                              <div>
+                                Group value: <span>{claim.value}</span>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                      <hr />
+                    </div>
+                  );
+                })}
+              </div>
+
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "row",
+                  justifyContent: "space-between",
+                  margin: "1em 0",
+                }}
+              >
+                <button
+                  type="submit"
+                  style={{
+                    width: "45%",
+                    padding: "1.2em",
+                    backgroundColor: "green",
+                    border: "0px solid ",
+                    borderRadius: "16px",
+                    color: "white",
+                    fontWeight: "bold",
+                  }}
+                >
+                  SAVE
+                </button>
+                <button
+                  onClick={handleCloseEditModal}
+                  style={{
+                    width: "45%",
+                    padding: "1.2em",
+                    backgroundColor: "red",
+                    border: "0px solid",
+                    borderRadius: "16px",
+                    color: "white",
+                    fontWeight: "bold",
+                  }}
+                >
+                  CANCEL
+                </button>
+              </div>
+            </form>
+          </ContainerContent>
+        </Container>
+      ) : null}
+      {showAddModal ? (
+        <Container>
+          <ContainerContent className="modal-content">
+            <h3>Add new Server {newServerName}</h3>
+            <form
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                width: "100%",
+                gap: "0.8em",
+              }}
+              onSubmit={handleSaveAddServer}
+            >
+              <p>
+                <strong>Id:</strong>{" "}
+                <input
+                  type="number"
+                  onChange={(e) => setEditServerId(+e.target.value)}
+                  style={{
+                    padding: "0.4em",
+                    border: "0px",
+                    borderRadius: "16px",
+                  }}
+                />
+              </p>
+              <p>
+                <strong>Server name:</strong>
+                <input
+                  type="string"
+                  onChange={(e) => setNewServerName(e.target.value)}
+                  style={{
+                    padding: "0.4em",
+                    border: "0px",
+                    borderRadius: "16px",
+                  }}
+                />
+              </p>
+
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "1em",
+                }}
+              >
+                <div
+                  style={{
+                    display: "flex",
+                    flexDirection: "row",
+                    gap: "1em",
+                  }}
+                >
+                  {showDiscordRoles ? (
                     <>
+                      <p>
+                        Edit Group Claims for this server <strong>role</strong>:
+                      </p>
+                      <select
+                        onChange={handleSelectServerRole}
+                        style={{
+                          padding: "0.4em",
+                          border: "0px",
+                          borderRadius: "16px",
+                        }}
+                        required={showDiscordRoles}
+                      >
+                        {discordRoles.map((role) => (
+                          <option value={role} key={role}>
+                            {role}
+                          </option>
+                        ))}
+                      </select>
+                    </>
+                  ) : (
+                    <>
+                      <p>Add your Discord Server id to pull roles</p>
+                      <input
+                        type="string"
+                        placeholder="discord server id"
+                        onChange={handleDiscordServerId}
+                        required={!showDiscordRoles}
+                        style={{
+                          border: "0px",
+                          borderRadius: "16px",
+                        }}
+                      />
+                    </>
+                  )}
+                </div>
+                {showGitcoinValue && (
+                  <div
+                    style={{
+                      display: "flex",
+                      flexDirection: "row",
+                      gap: "1em",
+                    }}
+                  >
+                    Gitcoin Passport value:
+                    <input
+                      type="number"
+                      placeholder="10"
+                      onChange={(e) => setGitcoinValue(+e.target.value)}
+                      required={showGitcoinValue}
+                      style={{
+                        padding: "0.4em",
+                        border: "0px",
+                        borderRadius: "16px",
+                      }}
+                    />
+                  </div>
+                )}
+
+                <div style={{ color: "black" }}>
+                  <span style={{ color: "white" }}>Groups:</span>
+                  <SelectMultiple
+                    options={serverClaimsOption}
+                    selected={selectedNewServerOption}
+                    setSelected={setSelectedNewServerOption}
+                  />
+                </div>
+              </div>
+
+              <div>
+                <h3>Current Roles and Claims</h3>
+                {newServerRoles.map((claim: IClaimsPerRole) => {
+                  const role = Object.keys(claim)[0];
+                  const claims = claim[role];
+                  return (
+                    <div key={role}>
                       <div
                         key={role}
                         style={{
@@ -391,7 +675,7 @@ const Servers: React.FC = () => {
                         </div>
                       </div>
                       <hr />
-                    </>
+                    </div>
                   );
                 })}
               </div>
