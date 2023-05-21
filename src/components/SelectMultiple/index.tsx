@@ -23,7 +23,8 @@ const ValueContainer = ({
         values = `"${val(0)}", "${val(1)}" and "${val(2)}"`;
         break;
       default:
-        values = '\"'+values.map((v: any) => v.props.children).join("\", \"")+'\"';
+        values =
+          '"' + values.map((v: any) => v.props.children).join('", "') + '"';
         break;
     }
   }
@@ -37,8 +38,8 @@ const ValueContainer = ({
 };
 
 const SelectMultiple = (props: {
-  options: IServerOption[];
   selected: IServerOption[];
+  options: IServerOption[];
   setSelected: React.Dispatch<React.SetStateAction<IServerOption[]>>;
 }): JSX.Element => {
   return (
@@ -53,6 +54,7 @@ const SelectMultiple = (props: {
       components={{
         ValueContainer,
       }}
+      required={true}
     />
   );
 };

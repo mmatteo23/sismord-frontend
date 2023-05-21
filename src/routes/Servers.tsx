@@ -7,6 +7,8 @@ import {
   getAllServersFromOwnerId,
   setAllServers,
 } from "../utils/backend";
+import {ReactComponent as DiscordChads} from '../discordchads.svg';
+import styled from "styled-components";
 
 type IServerSettings = {
   id: number;
@@ -52,6 +54,27 @@ function convertOptionToClaim(
   }
 }
 
+const Header = styled.header`
+  background-color: #2737e6;
+  min-height: 10vh;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  color: white;
+  font-size: calc(10px + 2vmin);
+  padding: 0 2rem;
+`;
+
+const Container = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background-color: #f5f5f5;
+`;
+
+
 const Servers: React.FC = () => {
   const [ownerId, setOwnerId] = useState<string>("0xFraye");
 
@@ -70,6 +93,7 @@ const Servers: React.FC = () => {
   const [showGitcoinValue, setShowGitcoinValue] = useState<boolean>(false);
 
   const [newServerName, setNewServerName] = useState<string>("");
+  const [newServerRoles, setNewServerRoles] = useState<IClaimsPerRole[]>([]);
   const [newServerRole, setNewServerRole] = useState<string>("");
   const [selectedNewServerOption, setSelectedNewServerOption] = useState<
     IServerOption[]
@@ -86,9 +110,9 @@ const Servers: React.FC = () => {
 
   // onLoad get serverClaims and servers from backend
   useEffect(() => {
-    getAllDiscordRoles().then((roles) => setDiscordRoles(roles));
+    getAllDiscordRoles().then(setDiscordRoles);
     getServerGroups();
-    getAllServersFromOwnerId(ownerId).then((servers) => setServers(servers));
+    getAllServersFromOwnerId(ownerId).then(setServers);
   }, []);
 
   // handle show correct server in showEdit
@@ -98,6 +122,7 @@ const Servers: React.FC = () => {
       if (editServer == null) return;
 
       setNewServerName(editServer.name);
+      setNewServerRoles(editServer.claims);
     }
   }, [servers, editServerId]);
 
@@ -129,12 +154,10 @@ const Servers: React.FC = () => {
   };
 
   const handleSaveEditServer = () => {
-    // TODO test it
     const newServers = servers.map((server) => {
-    
       if (server.id === editServerId) {
-        const newServerClaims: IServerClaim[] = selectedNewServerOption.map((option) =>
-          convertOptionToClaim(option, gitcoinValue)
+        const newServerClaims: IServerClaim[] = selectedNewServerOption.map(
+          (option) => convertOptionToClaim(option, gitcoinValue)
         );
         const foundClaim = server.claims.find(
           (claim: IClaimsPerRole) => claim[newServerRole]
@@ -142,16 +165,13 @@ const Servers: React.FC = () => {
 
         if (foundClaim) {
           server.claims.find(
-            (claim: IClaimsPerRole) => claim[newServerRole] = newServerClaims
+            (claim: IClaimsPerRole) => (claim[newServerRole] = newServerClaims)
           );
         } else {
           server.claims.push({ [newServerRole]: newServerClaims });
         }
-        // To test if returns modified server
-        return server;
-      } else {
-        return server;
       }
+      return server;
     });
     setAllServers(ownerId, newServers);
 
@@ -166,76 +186,92 @@ const Servers: React.FC = () => {
 
   return (
     <>
-      <h2> Hi! This is the Servers page</h2>
-      <label>
-        Owner Id:
-        <input
-          type="text"
-          value={ownerId}
-          onChange={(e) => setOwnerId(e.target.value)}
-        />
-      </label>
-      {showEditModal && !!editServerId ? (
-        <div className="modal">
-          <div className="modal-content">
-            <h3>Edit Server {newServerName}</h3>
-            <div style={{ display: "flex", flexDirection: "column", flex: 1 }}>
-              <label>Id: {editServerId}</label>
-              <label>Server name: {newServerName}</label>
+      <Header className="navbar">
+        <div className="logo"><DiscordChads style={{width: "20%", height: "20%"}}/></div>
+        <div className="user">
+          Hi{" "}
+          <span style={{ color: "red", textDecoration: "underline" }}>
+            {ownerId}
+          </span>
+          !
+        </div>
+      </Header>
+      <Container>
+        <div className="servers">
+          <h2>Here are your servers</h2>
 
-              <label>
-                Edit Claims with Server role:
-                <select onChange={handleSelectServerRole}>
-                  {discordRoles.map((role) => (
-                    <option value={role} key={role}>
-                      {role}
-                    </option>
-                  ))}
-                </select>
-              </label>
-              {showGitcoinValue && (
+          <table>
+            <thead>
+              <tr>
+                <th>Server Name</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              {servers.map((server) => (
+                <tr key={server.id}>
+                  <tr>
+                    <td>{server.name}</td>
+                    <td>
+                      <button
+                        className="edit-server"
+                        onClick={() => handleEditServer(server.id)}
+                      >
+                        Edit Server
+                      </button>
+                    </td>
+                  </tr>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </Container>
+      {showEditModal && !!editServerId ? (
+          <>
+            <div className="modal-content">
+              <h3>Edit Server {newServerName}</h3>
+              <div
+                style={{ display: "flex", flexDirection: "column", flex: 1 }}
+              >
+                <label>Id: {editServerId}</label>
+                <label>Server name: {newServerName}</label>
+
                 <label>
-                  Gitcoin Passport value:
-                  <input
-                    type="number"
-                    placeholder="10"
-                    onChange={(e) => setGitcoinValue(+e.target.value)}
+                  Edit Claims with Server role:
+                  <select onChange={handleSelectServerRole}>
+                    {discordRoles.map((role) => (
+                      <option value={role} key={role}>
+                        {role}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                {showGitcoinValue && (
+                  <label>
+                    Gitcoin Passport value:
+                    <input
+                      type="number"
+                      placeholder="10"
+                      onChange={(e) => setGitcoinValue(+e.target.value)}
+                      required={showGitcoinValue}
+                    />
+                  </label>
+                )}
+                <label>
+                  Groups:
+                  <SelectMultiple
+                    options={serverClaimsOption}
+                    selected={selectedNewServerOption}
+                    setSelected={setSelectedNewServerOption}
                   />
                 </label>
-              )}
-              <label>
-                Groups:
-                <SelectMultiple
-                  options={serverClaimsOption}
-                  selected={selectedNewServerOption}
-                  setSelected={setSelectedNewServerOption}
-                />
-              </label>
-              <button onClick={handleSaveEditServer}>Save</button>
-              <button onClick={handleCloseEditModal}>Cancel</button>
-            </div>
-          </div>
-        </div>
-      ) : null}
-
-      <div>
-        <h1>List of your Servers</h1>
-        <div className="servers">
-          <div className="server">
-            {servers.map((server) => (
-              <div key={server.id}>
-                <div className="server-name">{server.name}</div>
-                <button
-                  className="edit-server"
-                  onClick={() => handleEditServer(server.id)}
-                >
-                  Edit Server
-                </button>
+                <button onClick={handleSaveEditServer}>Save</button>
+                <button onClick={handleCloseEditModal}>Cancel</button>
               </div>
-            ))}
-          </div>
-        </div>
-      </div>
+            </div>
+          </>
+        ) : null}
     </>
   );
 };
