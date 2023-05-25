@@ -33,11 +33,11 @@ To execute the whole application locally, there are two paths:
 
 ### Steps to run the application
 The steps to run the application are the following:
-1. Clone the [Sismord bot repository](https://github.com/0xCaso/zkhack-lisbon-discord-bot) (follow the readme instructions to set up the bot).
+1. Clone the [Sismord bot repository](https://github.com/0xCaso/sismord-discord-bot) (follow the readme instructions to set up the bot).
 2. Clone this repository and install the dependencies:
     ```bash
-    git clone https://github.com/mmatteo23/zkhack-lisbon-frontend
-    cd zkhack-lisbon-frontend
+    git clone https://github.com/mmatteo23/sismord-frontend
+    cd sismord-frontend
     yarn
     ```
 3. Create the `.env` file and fill it with the correct values:
