@@ -1,6 +1,6 @@
 import React from "react";
 import Select, { components, ValueContainerProps } from "react-select";
-import { IServerOption } from "../../routes/Servers";
+import { IServerOption } from "../../routes/servers.types";
 
 const ValueContainer = ({
   children,

@@ -1,0 +1,131 @@
+header {
+  min-height: 10vh;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  flex: 1;
+  align-items: center;
+  align-content: middle;
+  color: black;
+  font-size: calc(10px + 2vmin);
+  padding: 0 2rem;
+}
+
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background-color: #5865f2;
+  max-width: 80vw;
+  margin: 2em auto;
+  padding: 1em;
+  border-radius: 16px;
+  color: white;
+}
+
+.container_content {
+  width: 80%;
+  margin: 0 auto;
+}
+
+.flexed_row_og {
+  display: flex;
+  flex-direction: row;
+  gap: 1em;
+}
+
+.flexed_row {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+}
+
+.flexed_col {
+  display: flex;
+  flex-direction: column;
+  gap: 1em;
+}
+
+.ownerId {
+  color: red;
+  text-decoration: underline;
+  font-size: 2em;
+}
+
+.add_server {
+  padding: 1.2em;
+  border: 0px;
+  border-radius: 16px;
+  background-color: green;
+  color: white;
+  cursor: pointer;
+}
+
+.bordered {
+  border: 0px;
+  border-radius: 16px;
+  padding: 0.4em;
+}
+
+.servers_list {
+  display: flex;
+  flex-direction: column;
+}
+
+.edit_server {
+  margin-right: 0.4em;
+  padding: 1.2em;
+  border: 0px;
+  border-radius: 16px;
+  background-color: #E17E0D;
+  color: white;
+  cursor: pointer;
+}
+
+.edit_server_form {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.select_roles {
+  padding: 0.4em;
+  border: 0px;
+  border-radius: 16px;
+}
+
+.select_gitcoin {
+  padding: 0.4em;
+  border: 0px;
+  border-radius: 16px;
+}
+
+.submit_btn {
+  width: 45%;
+  padding: 1.2em;
+  background-color: green;
+  border: 0px solid;
+  border-radius: 16px;
+  color: white;
+  font-weight: bold;
+}
+
+.cancel_btn {
+  width: 45%;
+  padding: 1.2em;
+  background-color: red;
+  border: 0px solid;
+  border-radius: 16px;
+  color: white;
+  font-weight: bold;
+}
+
+.server {
+  align-items: center;
+  margin: 0.8em 0;
+  padding: 0 1.2em;
+  border-radius: 12px;
+  background-color: white;
+  color: black;
+}
