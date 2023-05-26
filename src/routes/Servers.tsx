@@ -8,91 +8,13 @@ import {
   setAllServers,
 } from "../utils/backend";
 import { ReactComponent as DiscordChads } from "../discordchads.svg";
-import styled from "styled-components";
-
-type IServerSettings = {
-  id: number;
-  name: string;
-  claims: IClaimsPerRole[];
-};
-
-export interface IClaimsPerRole {
-  [key: string]: IServerClaim[];
-}
-
-export type IServerClaim = {
-  id: string;
-  name?: string;
-  value?: number;
-};
-
-export type IServerOption = {
-  value: string;
-  label?: string;
-};
-
-function convertClaimToOption(claim: IServerClaim): IServerOption {
-  return {
-    value: claim.id,
-    label: claim.name,
-  };
-}
-
-function convertOptionToClaim(
-  option: IServerOption,
-  newValue: number
-): IServerClaim {
-  if (newValue > -1) {
-    return {
-      id: option.value,
-      value: newValue,
-    };
-  } else {
-    return {
-      id: option.value,
-    };
-  }
-}
-
-const Header = styled.header`
-  min-height: 10vh;
-  display: flex;
-  flex-direction: row;
-  flex: 1;
-  align-items: center;
-  justify-content: space-between;
-  align-content: middle;
-  color: black;
-  font-size: calc(10px + 2vmin);
-  padding: 0 2rem;
-`;
-
-const Container = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  background-color: #5865f2;
-  max-width: 80vw;
-  margin: 2em auto;
-  padding: 1em;
-  border-radius: 16px;
-  color: white;
-`;
-
-const ContainerContent = styled.div`
-  width: 80%;
-  margin: 0 auto;
-`;
-
-const Table = styled.table`
-  width: 100%;
-  border-collapse: collapse;
-  border-spacing: 0;
-  margin: 0 auto;
-  margin-bottom: 2em;
-  border: 1px solid #000;
-`;
+import {
+  IServerSettings,
+  IClaimsPerRole,
+  IServerClaim,
+  IServerOption,
+} from "./servers.types";
+import { convertClaimToOption, convertOptionToClaim } from "../utils/servers";
 
 const Servers: React.FC = () => {
   const [ownerId, setOwnerId] = useState<string>("0xFraye");
@@ -110,7 +32,6 @@ const Servers: React.FC = () => {
   const [showDiscordRoles, setShowDiscordRoles] = useState<boolean>(false);
 
   const [discordRoles, setDiscordRoles] = useState<string[]>([]);
-  const [filteredRoles, setFilteredRoles] = useState<string[]>([]);
   const [selectedRoles, setSelectedRoles] = useState<string[]>([]);
 
   const [showAddModal, setShowAddModal] = useState<boolean>(false);
@@ -162,13 +83,6 @@ const Servers: React.FC = () => {
     setShowGitcoinValue(isGitcoin);
   }, [selectedNewServerOption]);
 
-  // handle filter roles
-  // useEffect(() => {
-  //   setFilteredRoles(
-  //     discordRoles.filter((role) => !selectedRoles.includes(role))
-  //   );
-  // }, [discordRoles, selectedRoles]);
-
   const handleEditServer = (id: number) => {
     setEditServerId(id);
     setShowEditModal(true);
@@ -187,23 +101,28 @@ const Servers: React.FC = () => {
     setEditServerId(null);
   };
 
+  const findReplaceClaim = (
+    claims: IClaimsPerRole[],
+    newClaims: IServerClaim[]
+  ): IClaimsPerRole[] => {
+    const claimIndex = claims.findIndex(
+      (claim) => Object.keys(claim)[0] === newServerRole
+    );
+    if (claimIndex > -1) {
+      claims[claimIndex][newServerRole] = newClaims;
+    } else {
+      claims.push({ [newServerRole]: newClaims });
+    }
+    return claims;
+  };
+
   const handleSaveEditServer = () => {
     const newServers = servers.map((server) => {
       if (server.id === editServerId) {
         const newServerClaims: IServerClaim[] = selectedNewServerOption.map(
           (option) => convertOptionToClaim(option, gitcoinValue)
         );
-        const foundClaim = server.claims.find(
-          (claim: IClaimsPerRole) => claim[newServerRole]
-        );
-
-        if (foundClaim) {
-          server.claims.find(
-            (claim: IClaimsPerRole) => (claim[newServerRole] = newServerClaims)
-          );
-        } else {
-          server.claims.push({ [newServerRole]: newServerClaims });
-        }
+        server.claims = findReplaceClaim(server.claims, newServerClaims);
       }
       return server;
     });
@@ -225,18 +144,7 @@ const Servers: React.FC = () => {
           const newServerClaims: IServerClaim[] = selectedNewServerOption.map(
             (option) => convertOptionToClaim(option, gitcoinValue)
           );
-          const foundClaim = server.claims.find(
-            (claim: IClaimsPerRole) => claim[newServerRole]
-          );
-
-          if (foundClaim) {
-            server.claims.find(
-              (claim: IClaimsPerRole) =>
-                (claim[newServerRole] = newServerClaims)
-            );
-          } else {
-            server.claims.push({ [newServerRole]: newServerClaims });
-          }
+          server.claims = findReplaceClaim(server.claims, newServerClaims);
         }
         return server;
       });
@@ -264,73 +172,32 @@ const Servers: React.FC = () => {
 
   return (
     <>
-      <Header className="navbar">
+      <div className="header flexed_row">
         <div className="logo">
-          <DiscordChads style={{ width: "20%", height: "20%" }} />
+          <DiscordChads style={{ width: "40%", height: "40%" }} />
         </div>
         <div className="user">
-          Hi{" "}
-          <span style={{ color: "red", textDecoration: "underline" }}>
-            {ownerId}
-          </span>{" "}
-          !
+          Hi <span className="ownerId">{ownerId}</span>!
         </div>
-      </Header>
-      <Container>
-        <ContainerContent className="servers">
-          <div
-            style={{
-              display: "flex",
-              flexDirection: "row",
-              justifyContent: "space-between",
-            }}
-          >
+      </div>
+      <div className="container">
+        <div className="container_content">
+          <div className="flexed_row">
             <h2>Here are your servers</h2>
-            <button
-              style={{
-                padding: "1.2em",
-                border: "0px",
-                borderRadius: "16px",
-                backgroundColor: "green",
-                color: "white",
-                cursor: "pointer",
-              }}
-              onClick={handleAddServer}
-            >
+            <button className="add_server" onClick={handleAddServer}>
               Add new
             </button>
           </div>
 
-          <div style={{ display: "flex", flexDirection: "column" }}>
+          <div className="servers_list">
             {servers.map((server, index) => (
-              <div
-                key={server.id}
-                style={{
-                  display: "flex",
-                  flexDirection: "row",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                  margin: "0.8em 0",
-                  padding: "0 1.2em",
-                  borderRadius: "12px",
-                  backgroundColor: "white",
-                  color: "black",
-                }}
-              >
+              <div key={server.id} className="flexed_row server">
                 <div>
                   <span>#{index + 1}</span>
                   <h2>{server.name}</h2>
                 </div>
                 <button
-                  style={{
-                    marginRight: "0.4em",
-                    padding: "1.2em",
-                    borderRadius: "16px",
-                    border: "0px",
-                    backgroundColor: "#E17E0D",
-                    color: "white",
-                    cursor: "pointer",
-                  }}
+                  className="edit_server"
                   onClick={() => handleEditServer(server.id)}
                 >
                   Edit
@@ -338,20 +205,13 @@ const Servers: React.FC = () => {
               </div>
             ))}
           </div>
-        </ContainerContent>
-      </Container>
+        </div>
+      </div>
       {showEditModal && !!editServerId ? (
-        <Container>
-          <ContainerContent className="modal-content">
+        <div className="container">
+          <div className="container_content">
             <h3>Edit Server {newServerName}</h3>
-            <form
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                width: "100%",
-              }}
-              onSubmit={handleSaveEditServer}
-            >
+            <form className="edit_server_form" onSubmit={handleSaveEditServer}>
               <p>
                 <strong>Id:</strong> <code>{editServerId}</code>
               </p>
@@ -360,30 +220,14 @@ const Servers: React.FC = () => {
               </p>
               <br />
 
-              <div
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: "1em",
-                }}
-              >
-                <div
-                  style={{
-                    display: "flex",
-                    flexDirection: "row",
-                    gap: "1em",
-                  }}
-                >
+              <div className="flexed_col">
+                <div className="flexed_row_og">
                   <p>
                     Edit Group Claims for this server <strong>role</strong>:
                   </p>
                   <select
                     onChange={handleSelectServerRole}
-                    style={{
-                      padding: "0.4em",
-                      border: "0px",
-                      borderRadius: "16px",
-                    }}
+                    className="select_roles"
                     required
                   >
                     {discordRoles.map((role) => (
@@ -394,24 +238,14 @@ const Servers: React.FC = () => {
                   </select>
                 </div>
                 {showGitcoinValue && (
-                  <div
-                    style={{
-                      display: "flex",
-                      flexDirection: "row",
-                      gap: "1em",
-                    }}
-                  >
+                  <div className="flexed_row_og">
                     Gitcoin Passport value:
                     <input
                       type="number"
                       placeholder="10"
                       onChange={(e) => setGitcoinValue(+e.target.value)}
                       required={showGitcoinValue}
-                      style={{
-                        padding: "0.4em",
-                        border: "0px",
-                        borderRadius: "16px",
-                      }}
+                      className="select_gitcoin"
                     />
                   </div>
                 )}
@@ -433,27 +267,13 @@ const Servers: React.FC = () => {
                   const claims = claim[role];
                   return (
                     <div key={role}>
-                      <div
-                        style={{
-                          display: "flex",
-                          flexDirection: "row",
-                          justifyContent: "space-between",
-                        }}
-                      >
+                      <div className="flexed_row">
                         <div>
                           Role: <strong>{role}</strong>
                         </div>
                         <div>
                           {claims.map((claim: IServerClaim) => (
-                            <div
-                              key={claim.id}
-                              style={{
-                                display: "flex",
-                                flexDirection: "column",
-                                justifyContent: "space-between",
-                                gap: "0.2em",
-                              }}
-                            >
+                            <div key={claim.id} className="flexed_col">
                               <div>
                                 <strong>{getGroupNameFromId(claim.id)}</strong>
                               </div>
@@ -471,50 +291,21 @@ const Servers: React.FC = () => {
                 })}
               </div>
 
-              <div
-                style={{
-                  display: "flex",
-                  flexDirection: "row",
-                  justifyContent: "space-between",
-                  margin: "1em 0",
-                }}
-              >
-                <button
-                  type="submit"
-                  style={{
-                    width: "45%",
-                    padding: "1.2em",
-                    backgroundColor: "green",
-                    border: "0px solid ",
-                    borderRadius: "16px",
-                    color: "white",
-                    fontWeight: "bold",
-                  }}
-                >
+              <div className="flexed_row" style={{ margin: "1em 0" }}>
+                <button type="submit" className="submit_btn">
                   SAVE
                 </button>
-                <button
-                  onClick={handleCloseEditModal}
-                  style={{
-                    width: "45%",
-                    padding: "1.2em",
-                    backgroundColor: "red",
-                    border: "0px solid",
-                    borderRadius: "16px",
-                    color: "white",
-                    fontWeight: "bold",
-                  }}
-                >
+                <button onClick={handleCloseEditModal} className="cancel_btn">
                   CANCEL
                 </button>
               </div>
             </form>
-          </ContainerContent>
-        </Container>
+          </div>
+        </div>
       ) : null}
       {showAddModal ? (
-        <Container>
-          <ContainerContent className="modal-content">
+        <div className="container">
+          <div className="container_content">
             <h3>Add new Server {newServerName}</h3>
             <form
               style={{
@@ -530,11 +321,7 @@ const Servers: React.FC = () => {
                 <input
                   type="number"
                   onChange={(e) => setEditServerId(+e.target.value)}
-                  style={{
-                    padding: "0.4em",
-                    border: "0px",
-                    borderRadius: "16px",
-                  }}
+                  className="bordered"
                 />
               </p>
               <p>
@@ -550,20 +337,8 @@ const Servers: React.FC = () => {
                 />
               </p>
 
-              <div
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: "1em",
-                }}
-              >
-                <div
-                  style={{
-                    display: "flex",
-                    flexDirection: "row",
-                    gap: "1em",
-                  }}
-                >
+              <div className="flexed_col">
+                <div className="flexed_row_og">
                   {showDiscordRoles ? (
                     <>
                       <p>
@@ -571,11 +346,7 @@ const Servers: React.FC = () => {
                       </p>
                       <select
                         onChange={handleSelectServerRole}
-                        style={{
-                          padding: "0.4em",
-                          border: "0px",
-                          borderRadius: "16px",
-                        }}
+                        className="bordered"
                         required={showDiscordRoles}
                       >
                         {discordRoles.map((role) => (
@@ -593,33 +364,20 @@ const Servers: React.FC = () => {
                         placeholder="discord server id"
                         onChange={handleDiscordServerId}
                         required={!showDiscordRoles}
-                        style={{
-                          border: "0px",
-                          borderRadius: "16px",
-                        }}
+                        className="bordered"
                       />
                     </>
                   )}
                 </div>
                 {showGitcoinValue && (
-                  <div
-                    style={{
-                      display: "flex",
-                      flexDirection: "row",
-                      gap: "1em",
-                    }}
-                  >
+                  <div className="flexed_row_og">
                     Gitcoin Passport value:
                     <input
                       type="number"
                       placeholder="10"
                       onChange={(e) => setGitcoinValue(+e.target.value)}
                       required={showGitcoinValue}
-                      style={{
-                        padding: "0.4em",
-                        border: "0px",
-                        borderRadius: "16px",
-                      }}
+                      className="select_gitcoin"
                     />
                   </div>
                 )}
@@ -641,28 +399,13 @@ const Servers: React.FC = () => {
                   const claims = claim[role];
                   return (
                     <div key={role}>
-                      <div
-                        key={role}
-                        style={{
-                          display: "flex",
-                          flexDirection: "row",
-                          justifyContent: "space-between",
-                        }}
-                      >
+                      <div key={role} className="flexed_row">
                         <div>
                           Role: <strong>{role}</strong>
                         </div>
                         <div>
-                          {claims.map((claim: IServerClaim) => (
-                            <div
-                              key={claim.id}
-                              style={{
-                                display: "flex",
-                                flexDirection: "column",
-                                justifyContent: "space-between",
-                                gap: "0.2em",
-                              }}
-                            >
+                          {claims.map((claim) => (
+                            <div key={claim.id} className="flexed_col">
                               <div>
                                 <strong>{getGroupNameFromId(claim.id)}</strong>
                               </div>
@@ -680,46 +423,17 @@ const Servers: React.FC = () => {
                 })}
               </div>
 
-              <div
-                style={{
-                  display: "flex",
-                  flexDirection: "row",
-                  justifyContent: "space-between",
-                  margin: "1em 0",
-                }}
-              >
-                <button
-                  type="submit"
-                  style={{
-                    width: "45%",
-                    padding: "1.2em",
-                    backgroundColor: "green",
-                    border: "0px solid ",
-                    borderRadius: "16px",
-                    color: "white",
-                    fontWeight: "bold",
-                  }}
-                >
+              <div className="flexed_row" style={{ margin: "1em 0" }}>
+                <button type="submit" className="submit_btn">
                   SAVE
                 </button>
-                <button
-                  onClick={handleCloseEditModal}
-                  style={{
-                    width: "45%",
-                    padding: "1.2em",
-                    backgroundColor: "red",
-                    border: "0px solid",
-                    borderRadius: "16px",
-                    color: "white",
-                    fontWeight: "bold",
-                  }}
-                >
+                <button onClick={handleCloseEditModal} className="cancel_btn">
                   CANCEL
                 </button>
               </div>
             </form>
-          </ContainerContent>
-        </Container>
+          </div>
+        </div>
       ) : null}
     </>
   );
