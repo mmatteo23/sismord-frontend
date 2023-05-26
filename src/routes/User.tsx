@@ -20,13 +20,6 @@ enum SubscriptionStatus {
   NotSubscribed = "not-subscribed",
 }
 
-interface groupIdsObject {
-  // groupId: value
-  // example:
-  // `${GITCOIN_GROUP_ID}`: MIN_PASSPORT_VALUE,
-  [key: string]: number | undefined
-}
-
 export interface ServerClaim {
   id: string,
   value: number | undefined
@@ -39,79 +32,84 @@ function User() {
   const [validPage, setValidPage] = useState(false);
   const [botError, setBotError] = useState<string>("");
   const [specificError, setSpecificError] = useState<string>("");
+  const [serverId, setServerId] = useState<string>("");
+  const [userId, setUserId] = useState<string>("");
+  const [role, setRole] = useState<string>("");
+  const [sismoConnectConfig, setSismoConnectConfig] = useState<SismoConnectClientConfig>({
+    appId: process.env.REACT_APP_SISMO_APP_ID as string,
+    devMode: {
+      enabled: process.env.REACT_APP_ENV_NAME === "LOCAL" ? true : false,
+      devGroups: [],
+    },
+  });
+  const [claims, setClaims] = useState<any[]>([])
 
   const searchParams = new URLSearchParams(document.location.search)
-  
+
+  useEffect(() => {
+    if (!searchParams.get("sismoConnectResponseCompressed")) {
+      localStorage.removeItem("serverId")
+      localStorage.removeItem("userId")
+      localStorage.removeItem("role")
+      localStorage.removeItem("groups")
+    }
+  }, [])
+
   useEffect(() => {
     let serverId, userId, role
-    if (searchParams.get("serverId") && searchParams.get("userId")) {
+    if (
+      searchParams.get("serverId") && 
+      searchParams.get("userId") &&
+      searchParams.get("role")
+    ) {
       serverId = searchParams.get("serverId")
-      userId = searchParams.get("userId")
+      userId = searchParams.get("userId")?.replace("%23", "#")
       role = searchParams.get("role")
       localStorage.setItem("serverId", serverId as string)
-      localStorage.setItem("userId", userId as string + "#" + (document.location.href).split("#")[1])
+      localStorage.setItem("userId", userId as string)
       localStorage.setItem("role", role as string)
+      let query = `serverId=${serverId}&role=${role}`
+      if (!localStorage.getItem("groups")) {
+        axios
+          .get(`http://localhost:3333/api/discord/getServerGroupIds?${query}`)
+          .then((res) => {
+            let groupsObject = res.data
+            let list = []
+            const groups: ServerClaim[] = groupsObject
+            if (groups) {
+              for (const group of groups) {
+                if (group.value === undefined || group.value < 1) {
+                  list.push({ groupId: group.id })
+                } else {
+                  list.push({ groupId: group.id, value: group.value, claimType: ClaimType.GTE })
+                }
+              }
+            }
+            localStorage.setItem("groups", JSON.stringify(list))
+            setClaims(list)
+            let config = sismoConnectConfig
+            list.forEach(claim => {
+              config.devMode?.devGroups?.push({
+                groupId: claim.groupId,
+                data: {
+                  "0x5853bCAC824fc455C1e448706419633EFc452bC8": 6,
+                },
+              })
+            })
+            setSismoConnectConfig(config)
+          })
+          .catch((err) => {
+            console.log(err)
+          })
+      }
     } 
 
     if (localStorage.getItem("serverId") && localStorage.getItem("userId")) {
       setValidPage(true)
     }
+  }, [])
 
-    let query = `serverId=${serverId}&role=${role}`
-
-    axios
-      .get(`http://localhost:3333/api/discord/getServerGroupIds?${query}`)
-      .then((res) => {
-        localStorage.setItem("groups", JSON.stringify(res.data))
-      })
-      .catch((err) => {
-        console.log(err)
-      })
-  }, [searchParams])
-
-  // build the claims list
-  // if the groupId associated value is -1, it's just groupId: "GROUP_ID"
-  // otherwise, it's like { groupId: GITCOIN_PASSPORT_HOLDERS_GROUP_ID, value: 1, claimType: ClaimType.GTE },
-  const claimsList = () => {
-    let list = []
-    const groups: ServerClaim[] = JSON.parse(localStorage.getItem("groups") as string)
-    for (const group of groups) {
-      if (group.value === undefined || group.value < 1) {
-        list.push({ groupId: group.id })
-      } else {
-        list.push({ groupId: group.id, value: group.value, claimType: ClaimType.GTE })
-      }
-    }
-    return list
-  }
-
-  let sismoConnectConfig: SismoConnectClientConfig = {
-    appId: process.env.REACT_APP_SISMO_APP_ID as string,
-    devMode: {
-      enabled: process.env.REACT_APP_ENV_NAME === "LOCAL" ? true : false,
-      // add this line to override the "Gitcoin Passport Holders" group
-      // devGroups: [
-      //   // {
-      //   //   groupId: GITCOIN_PASSPORT_HOLDERS_GROUP_ID,
-      //   //   data: [
-      //   //     "0x5853bCAC824fc455C1e448706419633EFc452bC8",
-      //   //   ],
-      //   // },
-      // ],
-    },
-  };
-
-  claimsList().forEach(claim => {
-    sismoConnectConfig.devMode?.devGroups?.push({
-      groupId: claim.groupId,
-      data: [
-        "0x5853bCAC824fc455C1e448706419633EFc452bC8",
-      ],
-    })
-  })
-
-  // TODO: should be if(validPage)
-  if(!validPage) {
+  if(validPage) {
     return (
       <Main>
         {botError && (
@@ -128,16 +126,16 @@ function User() {
             <SismoConnectButton
               config={sismoConnectConfig}
               auths={[{ authType: AuthType.VAULT }]}
-              claims={claimsList()}
+              claims={claims}
               onResponse={(response) => {
                 setVerifying(true);
                 setSismoConnectResponse(response);
                 axios
-                  .post(`http://localhost:3333/api/discord/verifyResponse`, {
+                  .post(`http://localhost:3333/api/discord/verify`, {
                     serverId: localStorage.getItem("serverId"),
                     userId: localStorage.getItem("userId"),
                     role: localStorage.getItem("role"),
-                    claims: claimsList(),
+                    claims: localStorage.getItem("groups"),
                     sismoConnectResponse: response,
                   })
                   .then((res) => {
